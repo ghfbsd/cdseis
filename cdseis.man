@@ -1,0 +1,741 @@
+'\" t
+.\" Above line means this should be processed through tbl by the man command.
+.TH CDSEIS 1L "18 Nov. 2015" "U Bristol" 
+.SH NAME
+cdseis \- scans for and extracts digital seismic data from CDROMs and SEED volumes
+.SH SYNOPSIS
+.B cdseis
+<
+.I input_file
+.LP
+.SH DESCRIPTION
+CDSEIS is an interactive program for reading seismic data 
+from SEED volumes and writing to SAC or AH (ah or asc) files.
+(It was originally written to extract data from GDSN CD-ROMs, but expanded to
+work with SEED-oriented datasets.)
+Unlike other SEED-reading tools, the files that it outputs are event oriented,
+cut around the arrival times of specific (user-tailored) phases, and named
+using event-specific names.
+The files have event and station information populating the header information
+for the files.
+The result is a collection of traces that is immediately available for
+analysis.
+.LP 
+CDSEIS first reads an ascii index catalog created for each SEED volume or CD
+made by MAKELOG.
+The logs summarize the waveform start and stop times 
+and associates each with an event.  The user specifies various search 
+parameters to identify the desired seismograms.  Once the desired 
+time series are identified, they can then be read directly from the
+SEED volume or CD.  
+The use of an index file results in greatly increased speed compared 
+to searching through the entire SEED volume or CD to find the desired time
+series.
+.LP
+In extracting data with CDSEIS, a command language (similar to PLOTXY, etc.) 
+is used with defaults defined for most of the parameters so that a minimum 
+of user inputs are required.  The basic idea is to define a number of 
+search parameters which are used to select which seismograms to 
+read.  The program can be run in batch mode by constructing a file of 
+input parameters and redirecting standard input from that file. 
+.SH AUTHORS
+CDSEIS was written by Peter Shearer (1989) to run on a Macintosh.  
+Ken Creager added several options and modified the code to run in a 
+UNIX environment.  Tom McSweeney wrote the routine write_ah.c. 
+Doug Wiens wrote an early version of the instrument response 
+reader.  George Helffrich added SAC output and implemented reading
+of SEED volumes, and is responsible for continued maintenance of
+CDSEIS.
+Please report bugs, suggestions, and comments to G. Helffrich.
+Original author contacts:
+.LP
+.TS
+tab (^);
+l l.
+Peter Shearer (Mac comments)^Ken Creager (UNIX comments)
+IGPP A-025^Geophysics Program, AK-50
+U.C. San Diego^University of Washington
+La Jolla, CA  92093^Seattle, WA  98195
+(619)534-2260^(206)685-2803
+FAX (619)543-5332^FAX (206)543-0489
+
+George Helffrich (SEED version)
+Earth Sciences^Earth-Life Science Institute
+University of Bristol^Tokyo Instutite of Technology
+Wills Mem. Bldg.^2-12-1-IE-1 Ookayama
+Queen's Road^Meguro-ku
+Bristol BS8 1RJ^Tokyo 152-8551
+United Kingdom^Japan
++44 117 954 5437^+81-3-5734-2126
+FAX +44 117 925 3385^FAX +81-3-5734-3414
+.TE
+.SH "CDSEIS COMMANDS"
+A list of CDSEIS commands follows.
+.TS
+tab (^);
+l1 l.
+DMIN yr,mon,dy,hr,mn^T{
+Specifies a minimum event time.
+T}
+^(Default: 80 1 1 0 0)
+.sp
+DMAX yr,mon,dy,hr,mn^T{
+Specifies a maximum event time.
+T}
+^(Default: 95 1 1 0 0)
+.sp
+QLOC colat1,colat2,lon1,lon2^T{
+.na
+Specifies that the quake colatitude must lie between
+colat1 and colat2, and that the event longitude must
+lie between lon1 and lon2.
+T}
+^(Default: 0 180 0 360)
+.sp
+QDEP qdep1,qdep2^T{
+.na
+Specifies that the quake depth (km) must lie between
+qdep1 and qdep2.
+T}
+^(Default: 0 999)
+.sp
+QMAG qmag1,qmag2^T{
+.na
+Specifies that the quake Mb must lie between qmag1
+and qmag2.
+T}
+^(Default: 0.0 9.9)
+.sp
+SLOC colat1,colat2,lon1,lon2^T{
+Specifies the station location window (see QLOC).
+T}
+^(Default: 0 180 0 360)
+.sp
+MLOC colat1,colat2,lon1,lon2^T{
+.na
+Specifies the midpoint location window.  The 
+midpoint is calculated assuming a surface source, so
+this will only approximate the turning or bounce
+point for deep events.
+T}
+^(Default: 0 180 0 360)
+.sp
+PRNG colat,lon,del1,del2^T{
+.na
+Specifies that the event must be within a range (deg) of
+del1 and del2 from the point colat1, lon (see QLOC).
+T}
+^(Default: 0 0 0 180)
+.sp
+RANG del1,del2^T{
+.na
+Specifies that the event-station range (deg) must lie
+between del1 and del2.
+T}
+^(Default: 0 180)
+.sp
+QAZI azi1,azi2^T{
+.na
+Specifies that the quake azimuth from the station
+must lie between azi1 and azi2.
+T}
+^(Default: 0 360)
+.sp
+SAZI azi1,azi2^T{
+.na
+Specifies that the station azimuth from the quake
+must lie between azi1 and azi2.
+T}
+^(Default: 0 360)
+.sp
+WIND t1,t2^T{
+.na
+Specifies the time window of the seismogram to be
+read.  t1 and t2 are in minutes relative to the quake
+origin time (if PHAS is not specified) or relative to a
+seismic phase defined with the PHAS command.
+T}
+^(Default: 0 20)
+.sp
+SRAT sr1,sr2^T{
+Specifies minimum and maximum sample rates (Hz).
+T}
+^(Default: 1.0 1.0)
+.sp
+COMP icomp^T{
+.na
+Specifies flag for data components and rotations:
+1=zne, 2=zrt, 3=rt, 4=ne, 5=z, 6=n, 7=e, 8=r, 9=t, 10=any.
+If horizontal components are not available but are requested,
+no data are returned.
+T}
+^(Default: 10)
+.sp
+SYNC gapmax^T{
+.na
+Specifies maximum allowed timing error between
+points in data blocks during read.  If this limit is 
+exceeded, a new header is written to the output file
+during READ which contains the correct time for the
+new data block.
+T}
+^(Default: 0.1 seconds)
+.sp
+SNAM stname1,[stname2,...]^T{
+.na
+Specifies one to ten station names (or 'all').
+Note:  station names are capitalized!
+T}
+^(Default: all)
+.sp
+LOGF logfilename^T{
+Specifies index file name (see above).
+T}
+^(Default: log5161)
+.sp
+LDIR logfile_directory^T{
+Specifies directory containing logfile.
+T}
+^(Default: /data4/kcc/cdseis)
+.sp
+CDIR cdrom_directory^T{
+Specifies directory containing CDROM files. 
+T}
+^(Default: /cdrom)
+.sp
+ODIR output file_directory^T{
+Specifies directory for waveform output files. 
+T}
+^Note:  This directory must already exist.
+^(Default:)
+.sp
+FILE outfilename_codes^T{
+.na
+Specifies output file names for waveforms.  Enter up to 10 character strings 
+separated by spaces.  The file name used is a concatenation of all the strings 
+given, each separated with a period.  Strings ev st ch and ph have special 
+meaning (see Notes) and produce portions of file names based on event, station, 
+channel and phase.  If the file name contains a # character, it will be 
+replaced with one of the characters z, n, e, r, or t identifying the component.
+T}
+^(Default: ah.data)
+.sp
+OTYP output_file_type^T{
+Specifies the type of output file.
+.br
+sac is for a SAC file (see FILE description).
+.br
+ah is for an AH file.
+.br
+asc is for the ascii version of an AH file.
+T}
+^(Default: ah)
+.sp
+WTYP write_option^T{
+.na
+Specifies what to do if the output data file already
+exists.  For each waveform, if the file already exists, 
+you have the option to:
+a append to end of the file,
+w overwrite the file,
+n create a new file, or
+x do not write any data.
+If using n, '-1', '-2', ..., '-9', '-a',...,'-z' is appended to the
+file name if the file already exists.  If all 35 of these
+files already exist, do not write the output file.
+.br
+NOTE:  1) SAC files can only be written under 'n' mode.
+2) When writing AH files, append mode leaves the data file
+open after each write.  Once a file is closed by QUIT
+or by writing to a new filename, data can no longer 
+be appended, and 'a' mode behaves like 'n' mode.
+T}
+^(Default: n)
+.sp
+PLTS plot_sh^T{
+.na
+Writes to standard output one line per waveform that
+can subsequently be used to run a shell script (e.g., to
+run xyplot).  Options are:
+T}
+^T{
+0 do not write anything
+.br
+1 write format 1
+.br
+2 write format 2, etc.
+.br
+The user can specify a favorite format in subroutine 'datout.f'.
+T}
+^(Default: 0)
+.sp
+BINS bin_min,bin_max,increment^T{
+.na
+Construct a histogram of number of waveforms
+versus epicentral distance (deg) for each call to
+SCAN or READ.  Output is written to file 'bin.out'
+if bin_max>bin_min.
+T}
+^(Default: 90 90 5)
+.sp
+DEBU debug_flag^T{
+.na
+Write verbose header information to standard output
+if debug_flag=1.
+T}
+^(Default: 0)
+.sp
+PHAS filename1 (filename2)...^T{
+.na
+Specifies a filename or series of filenames (up to 10)
+containing travel time tables for seismic phases.  This
+table has a specific format described below.  If this is
+invoked, then the times defined by window are
+relative to these travel times.  If filename='none',
+then times are used relative to the quake origin time.
+T}
+^(Default: none)
+.sp
+PDIR logfile_directory^T{
+Specifies directory containing phase files.  
+T}
+^(Default: /data4/kcc/cdseis)
+.sp
+TTWR ttwr_flag^T{
+.na
+If ttwr_flag equals 1, write the travel time (min) of the 
+requested phase and a descriptive comment to the
+zeroth extra and the comment field of the AH header.  
+This information may be useful for subsequent 
+processing.
+T}
+^(Default: 0)
+.sp
+HELP^T{
+Lists available commands.
+T}
+.sp
+STAT^T{
+Shows current parameter values.
+T}
+.sp
+SCAN nscan^T{
+.na
+Performs search through logfile and lists matching
+seismograms, but does not read the CD or write to
+outfile.  If nscan=1, write a log-type file to scan.out.
+T}
+.sp
+READ^T{
+.na
+Performs search through logfile, reads data from CD
+and writes matching seismograms to output files.
+T}
+.sp
+COMM^T{
+Comment line.  Ignored by the program.
+T}
+.sp
+*^T{
+Comment line.  Ignored by the program.
+T}
+.sp
+QUIT^T{
+Exits from program.
+T}
+.TE
+.SH NOTES
+See README file for an extensive list of changes and bug fixes.
+.LP
+Waveform data are output in SAC binary (if OTYP=sac), 
+AH binary (if OTYP=ah) or ascii (if OTYP=asc) format.  
+One or more waveforms can be written
+into each output file depending on the value of WTYP.  The
+waveform file names consist of up to 10 character strings
+(see FILE) separated by periods.  The strings ev, st, ch,
+and ph have the following special meanings:
+.TP 
+ev:
+seven character unique event identifier:  YYMMDDA
+(YY=year, MM=month, DD=day, A=a for first event of the day, b for second event, ...) 
+.TP
+st:
+four character station name, blanks are replaced by _.
+.TP
+ch:
+three character channel identifier using SEED convention: (band, source, orientation)
+.br
+Band:
+s=short, l=long, i=intermediate, b=broadband
+.br
+Source:
+h=high-gain seismometer, l=low-gain/strong motion
+.br
+Orientation:
+z, n, e, r, t	for vertical, north, east, radial, and transverse.
+.TP
+ph:
+phase identifier:  file name of phase requested with the tt_ removed if present.
+.TP
+Example:  FILE st ev tonga ch 
+creates filenames like : 
+col_.860513b.tonga.lhz in the directory specified by ODIR.  Seismograms 
+from different stations, channels, or events will be written to different 
+filenames.
+.PP
+Along with each SAC waveform output file, an instrument response file is also 
+written.  This file's name is the same as the waveform output file but
+suffixed with '.pz'.  It contains the normalization constant and the poles and 
+zeroes representation of the response and may be used as input to the SAC
+transfer command (e.g. 'transfer from polezero subtype ...pz ...').
+The file also contains the equivalent of the AH record and event comments,
+as well as the processing log (which records time corrections, rotations,
+etc.).  The digital sensitivity (or gain) of each component is present as 
+the SCALE variable in the SAC file header.
+.LP
+Commands with angle limits are designed so that the angles 
+should "wrap" correctly.  For example,  QAZI  350  10   should select 
+quake azimuths 350 to 360 and 0 to 10.  This also applies to the 
+longitude arguments of  the QLOC and SLOC commands.
+.LP
+An attempt has been made to read the data log to obtain the 
+gain, normalization and poles and zeros of the instrument response.  
+For all examples checked by hand, this is working properly, but there 
+is no guarantee that these are always being read properly.  Obvious 
+errors are reported to standard output.  Data are output in counts 
+except when rotated components are requested.  In that case, 
+because the gain on the two horizontals is sometimes different, the 
+gain, but not the normalization, is divided from all components of the 
+data prior to rotation and the gain in the header is set to 1 (The 
+rotation option has not been carefully tested).  
+.LP
+Clock corrections are read from the station logs, linearly 
+interpolated, and applied to the data.  When a correction is applied, 
+the correction is written to the record log of the AH header.  If there 
+is a problem reading the clock corrections an error message is 
+written to standard output. 
+.LP
+If multiple file names are specified in PHAS, each phase will be 
+windowed and the data written as separate AH waveforms.
+.LP
+Data are output in counts.  Divide by gain to get ground 
+displacement (or velocity) at the reference frequency depending on 
+units of gain.  Use debug option and read data logs to get units.
+In order to be consistent with RDSEED and GOPHER programs at IRIS, the
+instrument response information for all AH output files has been converted 
+to give displacement in Meters.  NOTE that the gain typically given on
+the CDROM is in micrometers.  The gain for the SAC is left in micrometers.
+.SH "PHASE FILE FORMAT
+This file must be provided by the user if the PHAS command is used.  
+It contains a table of travel times as a function of range and event 
+depth.  An example of such a file follows:
+.LP
+.cs R 22 
+Very approximate PKP(BC) times
+.br
+    3    4
+.br
+            0.0   160.0   350.0   667.0
+.br 
+   145.0   19.66   19.30   18.93   18.38
+.br
+   150.0   19.90   19.54   19.17   18.62
+.br
+   152.0   19.99   19.63   19.26   18.71
+.br
+.cs R
+.LP
+The first line is ignored and can be used to identify the source of the 
+data.  The second line contains the number of ranges and depths, 
+respectively.  The third line contains the depths.  The following lines 
+comprise the travel time table itself with the first column containing 
+the ranges. Depths are in km, ranges are in degrees, and travel times 
+are in minutes.  Formats are as follows:
+.LP
+.cs R 22 
+      read (3,'(2i5)') nx,nd
+.br
+      read (3,'(8x,16f8.3)') (d(id),id=1,nd)
+.br
+      do 10 ix=1,ix
+.br
+10    read (3,'(17f8.3)') x(ix),(t(ix,id),id=1,nd)
+.br
+.cs R
+.LP
+The table can include up to 16 depths and 120 ranges.  The program 
+finds travel times by linearly interpolating values from the table.  A 
+travel time specified as 0.0 is not used by the program, so zero 
+values can be used to define the edges of the table.  However, if the 
+desired depth and range are outside values given in the table, the 
+program extrapolates from the nearest non-zero values.
+.SH EXAMPLES
+.cs R 22 
+logf log5160
+.br
+file outfile1
+.br
+dmin 83 7 7 16 5
+.br
+dmax 83 7 7 16 6
+.br
+srat 20 40
+.br
+comp 5
+.br
+wind 0 30
+.br
+read
+.br
+quit
+.br
+.cs R
+.LP
+This gets the first 30 minutes of short-period, vertical component 
+data for an event occuring on 83 7 7 16:5:39.79.  All available 
+stations are obtained, at sample rates between 20 and 40 Hz.  Data 
+are written to outfile1.  If FILE were changed to 'outfile st' then each 
+station would appear as a separate file, with names like outfile.anmo, 
+outfile.lon_, etc. 
+.LP
+.cs R 22 
+logf log5159
+.br
+file outfile2 ch
+.br
+dmin 82 1 1 0 0
+.br
+dmax 82 12 31 23 59.9
+.br
+srat 1 1
+.br
+rang 90 120
+.br
+comp 6
+.br
+phas tt_sks
+.br
+wind -.5 .5
+.br
+comp 7
+.br
+read
+.br
+quit
+.br
+.cs R
+.LP
+This gets 1 minute of long period data (1 Hz sample rate) at ranges 
+between 90 and 120 degrees, centered on the seismic phase SKS 
+defined by the travel time table tt_sks.  All stations and all events 
+during 1982 are considered.  Only horizontal component data are 
+read.  Data are written to two files called outfile2.lhn and outfile2.lhe  
+.LP
+.cs R 22 
+snam RSSD RSON
+.br
+rang 0 30
+.br
+qazi 180 270
+.br
+srat 4 40
+.br
+qmag 6.0 9.9
+.br
+qdep 0 50
+.br
+wind 0 10
+.br
+read
+.br
+quit
+.br
+.cs R
+.LP
+This gets 10 minutes of short- and intermediate-period data (4 to 40 
+Hz) from stations RSSD and RSON for all events greater than 
+magnitude 6.0, at depths less than 50 km, at ranges less than 30 
+degrees, and azimuths between 180 and 270 degrees from the 
+stations.  Data are read from CD #5161 (default) and written to 
+ah.data (default).  Only vertical component data are read (default).  If 
+the file ah.data already existed, all waveforms would be written to 
+ah.data-1.
+.SH "LOG FILE FORMAT"
+There is a log file for each collection of SEED volumes (or a data CD)
+that is generated with program MAKELOG.
+These files are written in ASCII and contain event and station 
+information.  An example from one of these files is below.  Each 
+event is described by a single line.  This line contains the event 
+origin time (year,month,day,hour,minute,second), the event location 
+(latitude, longitude), the event depth (km), the event magnitudes 
+(Mb,Ms), the Macintosh-CD file name containing the event, the record 
+length of the CD file (2000 byte records), and an unique event 
+identifier.  This is then followed by individual station lines which 
+identify the station name, file record number, event range (deg), 
+station azimuth, and event azimuth.  Up to three additional sets of 
+columns follow, with each set representing a different sample rate.  
+Each set contains the sample rate (s/sec), number of components, the 
+starting and ending time of the time series relative to the event 
+origin time (minutes), and the number of gaps (> 0.1 s) in the record.  
+.LP
+One event extracted from the LOGFILE
+.sp
+.cs 1 22 
+    85 10  1  15 54 51.35   52.334  -168.805   33.0  5.7  5.3  
+.br
+5571:1985:OCT:8527400.EVT  557 851001a
+.br
+ANMO    4  46.8  86.2 311.8   1.0 3   2.2  40.7 0  20.0 1   8.0  12.8 0
+.br
+ANTO   24  86.3 343.5  13.1   1.0 3   7.7  68.2 0  20.0 1  12.0  15.2 0
+.br
+CHTO   46  76.7 283.4  39.1   1.0 3   5.5  60.5 0  20.0 3  10.9  13.6 0
+.br
+GUMO   73  53.4 241.2  33.6   1.0 3   7.7  46.2 0
+.br
+BCAO   84 123.1 351.3   5.4   1.0 3  13.1  90.1 0
+.br
+NWAO  102 106.5 237.5  38.0   1.0 3  13.2  79.2 0
+.br
+GRFO  118  78.4 360.0   0.0   1.0 3   7.7  62.7 0  20.0 1  10.2  15.1 0
+.br
+SHIO  141  75.6 293.0  38.7   1.0 3   8.9  58.4 0  20.0 3  10.8  13.7 0
+.br
+TATO  168  58.4 270.6  42.5   1.0 3   7.7  51.7 0
+.br
+GAC   180  57.4  56.1 313.4   1.0 3   7.6  51.6 0
+.br
+CTAO  192  82.0 222.1  26.0   1.0 3   7.6  62.6 0
+.br
+ZOBO  206 109.2  91.8 320.3   1.0 3  13.2  84.7 0  20.0 1  16.8  19.3 0
+.br
+KONO  229  68.4   0.9 358.9   1.0 3   7.7  57.2 0  20.0 1   9.3  12.5 0
+.br
+SCP   249  59.6  61.7 314.6   1.0 3   7.7  51.7 0
+.br
+LON   261  30.6  81.5 298.0   1.0 3   2.2  29.7 0
+.br
+JAS1  270  36.3  93.8 309.3   1.0 3   2.2  35.2 0
+.br
+HON   280  32.1 160.8 347.5   1.0 3   2.2  35.2 0
+.br
+KEV   290  57.7 353.6  11.4   1.0 3   4.6  48.6 0
+.br
+AFI   302  66.0 183.2   2.0   1.0 3   7.7  57.2 0
+.br
+GDH   315  49.9  24.9 313.5   1.0 3   6.0  44.5 0
+.br
+SLR   326 150.5 327.5  21.4   1.0 3  15.2 108.7 0
+.br
+BDF   347 121.0  74.7 322.1   1.0 3  15.7  92.7 0
+.br
+TOL   365  87.2  11.7 350.7   1.0 3   9.8  70.3 0
+.br
+TAU   380 102.2 211.4  25.8   1.0 3  13.2  79.2 0
+.br
+RSCP  396  58.9  70.9 314.6   1.0 3   7.6  51.6 0
+.br
+RSNT  408  30.0  48.9 275.6   1.0 3   2.1  29.6 0  40.0 3   5.7   8.2 0
+.br
+RSNY  439  58.7  56.5 314.3   1.0 3   7.7  51.7 0  40.0 3   9.4  11.4 0
+.br
+RSON  469  44.7  60.5 302.5   1.0 3   2.2  40.7 0  40.0 3   7.7   9.7 0
+.br
+NRA0  498  67.3 359.8   0.2   1.0 3   9.2  53.2 0  40.0 3   9.8  16.0 0
+.br
+.cs 1
+.SH HISTORY
+CDSEIS was originally written for Mac personal computers in the late 1980s by
+Peter Shearer and ran under Mac OS.
+Macs were a system where it was relatively easy to read the seismic data CDs
+that were distributed in the 1980s by the US Geological Survey containing GSN
+data.
+As Unix workstations developed peripheral device support for CD readers, the
+motivation arose for Ken Creager to adapt the program to run under Unix.
+.LP
+The original GSN CDs contained data in a format closely resembling GSN
+day-tapes.
+This was an archival format suited to storage on 9-track magnetic tapes, and
+not designed for random data access.
+A companion program, MAKELOG, read the event and station information from the
+CDs and converted them into a log file for quick searching of the contents of
+the CDs.
+From this, the idea of a log file associated with a data volume emerged.
+.LP
+Neither USGS nor any other seismic data gathering organization distributes
+seismic data on CDs any more.
+Rather, network access to data is the norm.
+The Federation of Digital Seismic Networks established a common data format
+for the exchange of seismic data, known as SEED.
+Most data is distributed over the network now in that format.
+Consequently, a data shipment from a network data center is typically a SEED
+volume that contains station and instrument response information as well as
+the data.
+SEED is an archival format, however, so the idea of a log file to index the
+data inside of a SEED volume is a natural view.
+Thus, a new version of the MAKELOG program was developed by George Helffrich
+to index SEED volumes, and CDSEIS was adapted to read SEED volumes and extract
+data from them.
+This is the contemporary use of CDSEIS.
+.LP
+Some historical documentation notes follow.
+.LP 
+The program was originally written to run on a Macintosh so the CD 
+name and file names in the log files are appropriate for the 
+Macintosh and are translated to Unix file names within CDSEIS.  
+.LP 
+The following CDs are currently available:
+.LP 
+.TS
+tab (^);
+l l l.
+5033^Jan 80 - Sep 81^log5033  (5054)
+5159^Oct 81 - Mar 83^log5159
+5160^Apr 83 - Feb 84^log5160
+5161^Mar 84 - Dec 84^log5161
+5461^Jan 85 - Sep 85^log5461
+5571^Oct 85 - May 86^log5571
+4386^Jun 86 - Sep 86^log4386
+4438^Oct 86 - Dec 86^log4438
+4050^Jan 87 - Mar 87^log4050
+NARS^Jan 83 - Feb 88^logNARS
+ORF1-37^Jan 88 - Apr 88^logORF1 (ORFEUS Vols. 1-37)
+GEO..^Jun 95 - Jul 99^loggeo00 (GEOSCOPE Vols. 00-34)
+FDSN1-4^Jul 95 - Oct 99^logfdsn1 (FDSN Vols. 1-4)
+.TE
+.LP
+The four digit numbers are the disk names for the Macintosh.  They 
+are ignored by Unix, except that we continue to use them to identify 
+the log files.  Each CD contains a directory structure consisting of the 
+year and month, and one file per day, indexed by Julian day.  For 
+example, 1984/mar/8406100.evt contains data for the Julian day 61 
+of 1984.  Each day file may contain more than one event.  Some day 
+files do not exist since no events were recorded on that particular 
+day.  The data format in these files is identical to the GDSN event 
+tape format.  The log files listed above are the index files which 
+CDSEIS requires to read each CD.
+.LP
+The first CDROM produced by the NEIC was distributed in two formats.  
+The first has the number 5033 stamped on it.  The bytes on this disk are in 
+VAX format which has bytes swapped relative to UNIX conventions.  The second
+is labeled 5054 and uses UNIX conventions for byte order.  All subsequent disks
+use UNIX conventions.  If you have 5033, change the value of the logical
+variable 'byteswap' in 'cdseis.f' to '.true.'.  If you have 5054, make sure 
+byteswap=.false.  With these changes, CDSEIS should read your disk properly.
+.LP
+On a SUN Sparcstation MAKELOG takes about 1-2 hours to read an 
+entire CD and create a log file.  The resulting log file should then be 
+run through program CONVERTLOG.  This program simply modifies 
+each event line by adding an unique event identifier to the end of 
+each event line. It also removes the extra white space at the end of 
+each line, significantly reducing the disk space required by the logs. 
+.LP
+NOTE:  MAKELOG contains a simple algorithm to assign each 
+waveform record (~1000 samples per record) to one earthquake.  If 
+tprev is the time interval between a waveform record and the most 
+recent earthquake and tnext is the time to the next earthquake, the 
+record is assigned to the earlier event if tprev < 10 * tnext, and to the 
+later event otherwise.  When two or more earthquakes occur close in 
+time, data may exist for the earlier event but will be assigned to the 
+later event and thus not be properly retrieved.  This can easily be 
+changed in MAKELOG.

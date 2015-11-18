@@ -1,0 +1,13 @@
+.DS_Store
+.sachist
+cdseis
+cdseis.f.orig
+cdseis.sh
+datetime.f.orig
+datout.f.orig
+decode_ddl.c
+extract.f.orig
+extseed.f.orig
+rseed-test.f
+rseed.c.orig
+test.sh
