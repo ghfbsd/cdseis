@@ -3,9 +3,9 @@ COMM all of the data distributed on CDs.  It illustrates how make up a cdseis
 COMM input file, indicating where the data volume locations are (CDIR),
 COMM the phase arrival time files are (PDIR) and where the log files are (LDIR).
 COMM The request is a search for SKS between 145 degrees and 180 degrees for
-COMM all earthquakes larger than magnitude 5.9, and requests data for two
-COMM stations (WOL2, WOL3) in a time window of two minutes before SKS and
-COMM two minutes after SKS.
+COMM all earthquakes larger than magnitude 5.9, and requests data for four
+COMM stations (ANMO, SSB, WOL2, WOL3) in a time window of two minutes before
+COMM SKS and two minutes after SKS.
 LDIR ./logfiles
 PDIR ./
 CDIR /cdrom
