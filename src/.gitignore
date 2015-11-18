@@ -1,5 +1,7 @@
 .DS_Store
 .sachist
+*.o
+*.a
 cdseis
 cdseis.f.orig
 cdseis.sh

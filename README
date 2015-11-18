@@ -1,25 +1,19 @@
-CDSEIS is an interactive program for reading seismic data 
-from SEED volumes and writing to SAC or AH (ah or asc) files.
-(It was originally written to extract data from GDSN CD-ROMs, but expanded to
-work with SEED-oriented datasets.)
+CDSEIS is an interactive program for reading seismic data from SEED volumes and
+writing to SAC or AH (ah or asc) files.  (It was originally written to extract
+data from GDSN CD-ROMs, but expanded to work with SEED-oriented datasets.)
 Unlike other SEED-reading tools, the files that it outputs are event oriented,
 cut around the arrival times of specific (user-tailored) phases, and named
-using event-specific names.
-The files have event and station information populating the header information
-for the files.
-The result is a collection of traces that is immediately available for
-analysis.
+using event-specific names.  The files have event and station information
+populating the header information for the files.  The result is a collection of
+traces that is immediately available for analysis.
 
-CDSEIS first reads an ascii index catalog created for each SEED volume or CD
-made by MAKELOG.
-The logs summarize the waveform start and stop times 
-and associates each with an event.  The user specifies various search 
-parameters to identify the desired seismograms.  Once the desired 
-time series are identified, they can then be read directly from the
-SEED volume or CD.  
-The use of an index file results in greatly increased speed compared 
-to searching through the entire SEED volume or CD to find the desired time
-series.
+CDSEIS first reads an ascii index catalog created for each SEED volume (or CD)
+made by MAKELOG.  The logs summarize the waveform start and stop times 
+and associates each waveform with an event.  The user specifies various search 
+parameters to identify the desired seismograms.  Once the desired time series
+are identified, they can then be read directly from the SEED volume or CD.
+The use of an index file results in greatly increased speed compared to
+searching through the entire SEED volume or CD to find the desired time series.
 
 In extracting data with CDSEIS, a command language (similar to PLOTXY, etc.) 
 is used with defaults defined for most of the parameters so that a minimum 
@@ -68,7 +62,7 @@ event list is either taken from the SEED volume itself (if it contains one), or
 from an external catalog provided to the program.  Possible catalog formats are
 the Global CMT .ndek format or a file with one entry per line (see program for
 format details).
-Originally, MAKELOG read an entire cdrom and makes an ASCII log file of 
+Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
 all waveform start and stop times, associating each waveform with 
 an event.  On a SUN sparcstation this took about 1-2 hours for each 
 cdrom.  This program also read all the station corrections and instrument
@@ -80,10 +74,10 @@ up the output from this program.
 blanks to reduce the file size, and assigns a unique event designation 
 to each event.
 
-3) CDSEIS reads the modified log created by CONVERTLOG, accepts a 
+3) CDSEIS reads the modified log created by MAKELOG, accepts a 
 variety of search parameters in an interactive mode, and either 
-creates a list of available waveforms (without reading the CD) or 
-retrieves requested waveforms from the CD.  
+creates a list of available waveforms (without reading data) or 
+retrieves requested waveforms from the SEED volume (or a CD).  
 
 4) MAKE_TT makes up a set of approximate phase travel time tables from the
 Kennett and Buland tau-p routines.  CDSEIS uses these tables to calculate
@@ -102,22 +96,24 @@ Makefile.  All needed AH routines are included in cdseis.
 Some example (approximate) travel time curves are given in files 
 beginning with tt_ .
 
-Logs created by MAKELOG and CONVERTLOG, for several CDs
-are supplied in the files log*.  You only need to use 
-these programs to create new logs for new CDs.  WARNING:  We have 
-had to modify MAKELOG for every new CD, so it is likely that 
-it will crash on the next CD because of some peculiarity associated 
-with new data.  After running MAKELOG always check standard 
-output for errors and warnings.
+Logs created by MAKELOG and CONVERTLOG for almost all CDs that were ever
+distributed by seismological agencies are supplied in the files log*.  You
+only need to use these programs to create new logs for new SEED volumes or,
+heaven forbid, new CDs.  MAKELOG is now fairly robust in dealing with SEED
+volumes.  In the past, MAKELOG had to be modified for just about every new CD.
+While it is now unlikely to fail, it is possible that MAKELOG could crash on a
+subsequent SEED volume because of some peculiarity associated with new data.
+After running MAKELOG always check the log file, makelog.log, for errors and
+warnings.
 
 The first CD put out by the NEIC was distributed with integer bytes in the
 order that is standard for DEC computers and has the number 5033 stamped on the 
 front of the disk.  It was also distributed using the UNIX convention and has
 the number 5054 stamped on the front.  As far as I can tell these are identical
-except for the order of the bytes in each integer.  The log file 'log5033' works for
-either disk.  All subsequet CD's use the UNIX convention.  CDSEIS reads 5054 
-correctly if the variable 'byteswap' in the main program is set to '.false.' 
-and will read 5033 properly if 'byteswap' is set to '.true.'.
+except for the order of the bytes in each integer.  The log file 'log5033' works
+for either disk.  All subsequet CD's use the UNIX convention.  CDSEIS reads
+5054 correctly if the variable 'byteswap' in the main program is set to
+'.false.' and will read 5033 properly if 'byteswap' is set to '.true.'.
 
 example: 
 cdseis
@@ -149,8 +145,8 @@ by 'scan'.
 
 CHANGES AND BUG FIXES IN CDSEIS 2.0
 
-1)  The time corrections were given, improperly, as either the first or last time
-    correction in the station log.  It now properly interpolates the 
+1)  The time corrections were given, improperly, as either the first or last
+    time correction in the station log.  It now properly interpolates the 
     given time corrections to the time of the first sample in the seismogram.
 2)  Fix bug where gain is returned incorrectly if 3 component SP data is 
     followed by LP.
@@ -167,10 +163,10 @@ CHANGES AND BUG FIXES IN CDSEIS 2.0
     range/midpoint searches.
 9)  New station codes.  Made changes to SROSTA2 and stalist.  In the present
     version, this code isn't used, but one of these may form the basis of the
-    subroutine that Peter Shearer was asking for.  Instead, the station log is parsed
-    to obtain the station names, locations and data format information on the
-    CD being processed.  I'm somewhat chary of the instrument locations in
-    this list simply because a lot of it is typed in by hand and there is
+    subroutine that Peter Shearer was asking for.  Instead, the station log is
+    parsed to obtain the station names, locations and data format information
+    on the CD being processed.  I'm somewhat chary of the instrument locations
+    in this list simply because a lot of it is typed in by hand and there is
     a potential of screwing up the locations (thus the ckstainfo program).
     I checked the ones I added, but not the original ones.
 10) Fix bug on EOF -- causes infinite loop.  Proper command is QUIT not STOP.
@@ -212,13 +208,13 @@ CHANGES AND BUG FIXES IN CDSEIS 2.0
 
 WISHLIST
 - Change log file format to recognize that different LOCIDs with the same
-sample rate may be present at one station.  At present, if different LOCIDs have
-the same sample rate, they can't all be listed in the log file.  (The "seed"
-designator should also be changed at the same time to an identifier that takes
-up less space.)
+  sample rate may be present at one station.  At present, if different LOCIDs
+  have the same sample rate, they can't all be listed in the log file.  (The
+  "seed" designator should also be changed at the same time to an identifier
+  that takes up less space.)
 - Change SAC output so that freq-amp-phase response information may be written
-out in SAC's FAP file format.
+  out in SAC's FAP file format.
 - Change output from SEED volumes so that EVALRESP response output may be
-produced for full response information.
+  produced for full response information.
 
 Keep wishing for no bugs in the code.
