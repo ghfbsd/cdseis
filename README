@@ -56,23 +56,24 @@ the variable named 'byteswap' as described in the last paragraph below.
 There are four programs in the src directory: (CONVERTLOG is
 no longer useful; MAKELOG, MAKE_TT and CDSEIS are, however)
 
-1) MAKELOG (current) reads a list of SEED volumes and makes an ASCII log file of
-all waveform start and stop times, associating each waveform with an event.  The
-event list is either taken from the SEED volume itself (if it contains one), or
-from an external catalog provided to the program.  Possible catalog formats are
-the Global CMT .ndek format or a file with one entry per line (see program for
-format details).
+1) MAKELOG (current; in a separate repository called "makelog") reads a list
+of SEED volumes and makes an ASCII log file of all waveform start and stop
+times, associating each waveform with an event.  The event list is either taken
+from the SEED volume itself (if it contains one), or from an external catalog
+provided to the program.  Possible catalog formats are the Global CMT .ndk
+format or a file with one entry per line (see program for format details).
+
 Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
 all waveform start and stop times, associating each waveform with 
 an event.  On a SUN sparcstation this took about 1-2 hours for each 
 cdrom.  This program also read all the station corrections and instrument
 response poles and zeros, and reports errors and warnings to standard
 output when it does not recognize the format.  CONVERTLOG essentially tidied
-up the output from this program.
+up the output from this program.  (MAKELOG is here for historical completeness.)
 
 2) CONVERTLOG reads a cdrom log created by MAKELOG, removes trailing 
 blanks to reduce the file size, and assigns a unique event designation 
-to each event.
+to each event.  (CONVERTLOG is also here for historical completeness.)
 
 3) CDSEIS reads the modified log created by MAKELOG, accepts a 
 variety of search parameters in an interactive mode, and either 
