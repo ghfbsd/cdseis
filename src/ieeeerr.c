@@ -41,10 +41,15 @@
    Modified for MacOS X/i386 use - G. Helffrich 21 Jan. 2010
 
    Modified for MacOS X/x86_64 use - G. Helffrich 11 Nov. 2015
+
+   Modified for Linux v 3.x and higher kernels, and simplified for
+   MacOS use -- G. Helffrich 12 Oct. 2018
 */
 
+#define __USE_XOPEN_EXTENDED
 #include <signal.h>
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 #include <unistd.h>
 
@@ -76,6 +81,10 @@ unsigned int mxcsr;
 #endif
 
 #elif defined (__linux__)
+#if defined(HAVE_FENV_H)
+#define _GNU_SOURCE
+#include <fenv.h>
+#else
 /*  Linux variant of FPU control.  Danger, icebergs ahead.  */
 #include <fpu_control.h>
 #if defined(_SPARC_FPU_CONTROL_H)
@@ -112,6 +121,7 @@ unsigned int mxcsr;
 #define CONTEXT_PC context->eip
 #define CONTEXT_FP_SWORD context->fpstate->sw
 #define CONTEXT_FP_CWORD context->fpstate->cw
+#endif
 #endif
 #else
 #include <floatingpoint.h>
@@ -238,6 +248,45 @@ struct ieee_gaz {
    {_LINUXI386_OVR, "coprocessor segment overrun"},
 #define _LINUXI386_OVF 0x00040
    {_LINUXI386_OVR, "coprocessor stack overflow"},
+#endif
+#ifdef FE_DIVBYZERO
+   {FE_DIVBYZERO, "Divide by 0"},
+#endif
+#ifdef FE_INEXACT
+   {FE_INEXACT, "Inexact"},
+#endif
+#ifdef FE_INVALID
+   {FE_INVALID, "Invalid"},
+#endif
+#ifdef FE_OVERFLOW
+   {FE_OVERFLOW, "Overflow"},
+#endif
+#ifdef FE_UNDERFLOW
+   {FE_UNDERFLOW, "Underflow"},
+#endif
+#ifdef FPE_INTDIV
+   {FPE_INTDIV, "integer divide by zero"},
+#endif
+#ifdef FPE_INTOVF 
+   {FPE_INTOVF, "integer overflow"},
+#endif
+#ifdef FPE_FLTDIV 
+   {FPE_FLTDIV, "divide by zero"},
+#endif
+#ifdef FPE_FLTOVF 
+   {FPE_FLTOVF, "overflow"},
+#endif
+#ifdef FPE_FLTUND 
+   {FPE_FLTUND, "underflow"},
+#endif
+#ifdef FPE_FLTRES 
+   {FPE_FLTRES, "inexact result"},
+#endif
+#ifdef FPE_FLTINV
+   {FPE_FLTINV, "invalid operation"},
+#endif
+#ifdef FPE_FLTSUB
+   {FPE_FLTSUB, "subscript out of range"},
 #endif
    { -1, NULL}
 };
@@ -391,11 +440,12 @@ ieeeexf(sig, sip, scp)
 #undef BSD
 
 void
-ieeeexf(sig, code, scp, addr)
-   int sig, code;
-   char *addr;
+ieeeexf(sig, sigctx, sigusr)
+   int sig;
+   siginfo_t *sigctx;
+   void *sigusr;
 {
-   ieeeerr(code,(void*)0xdeadc0de);
+   ieeeerr(sigctx -> si_code, sigctx -> si_addr);
 }
 #endif
 
@@ -431,7 +481,7 @@ ieeeexf(sig)
 }
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) && !defined(HAVE_FENV_H)
 #include <asm/sigcontext.h>
 /* fexcp package by W. Metzenthen helped guide development of Linux/386
    section.
@@ -506,6 +556,24 @@ ieeeexf(sig)
 	 signal(SIGFPE,ieeeexf);
       }
 }
+#elif defined (__linux__) && defined (HAVE_FENV_H)
+static void
+ieeeexf(sig, sigctx, sigusr)
+   int sig;
+   siginfo_t *sigctx;
+   void *sigusr;
+{  
+   int code = sigctx -> si_code;
+   void *addr = sigctx -> si_addr;
+
+   if (sig != SIGFPE) {
+      fprintf(stderr,
+         "**IEEERR:  Unexpected signal %d, wanted %d (SIGFPE)!\n",sig,SIGFPE);
+      signal(SIGFPE,ieeeexf);
+   } else {
+      ieeeerr(code, addr);
+   }
+}
 #endif
 
 void
@@ -541,7 +609,7 @@ ieeeset_(what)
 	signal(SIGFPE,ieeeexf);
      }
    }
-#elif defined (__linux__)
+#elif defined (__linux__) && !defined (HAVE_FENV_H)
    {
      unsigned short mask = 0;
      unsigned short ctrl;
@@ -568,10 +636,36 @@ ieeeset_(what)
 	signal(SIGFPE,ieeeexf);
      }
    }
+#elif defined (__linux__) && defined (HAVE_FENV_H)
+   {
+     int mask = 0;
+     struct sigaction act;
+     void ieeeexf();
+
+     if (strstr(ptr,"inexact")) mask |= FE_INEXACT ;
+     if (strstr(ptr,"division")) mask |= FE_DIVBYZERO ;
+     if (strstr(ptr,"underflow")) mask |= FE_UNDERFLOW ;
+     if (strstr(ptr,"overflow")) mask |= FE_OVERFLOW ;
+     if (strstr(ptr,"invalid")) mask |= 0 /* no define */ ;
+     if (strstr(ptr,"all")) mask |= FE_INEXACT 
+				 | FE_DIVBYZERO
+                                 | FE_UNDERFLOW
+                                 | FE_OVERFLOW ;
+     if (strstr(ptr,"common")) mask |= FE_DIVBYZERO
+                                    | FE_UNDERFLOW
+                                    | FE_OVERFLOW ;
+     (void)feenableexcept(mask);
+     act.sa_sigaction = ieeeexf;
+     (void)sigemptyset(&act.sa_mask);
+     (void)sigaddset(&act.sa_mask,SIGABRT);
+     act.sa_flags = SA_SIGINFO;
+     sigaction(SIGFPE,&act,NULL);
+   }
 #elif !defined (__ppc__) && defined (__APPLE__)
    {
      int mask = 0, ctrl;
      fexcept_t flag;
+     void ieeeexf();
 
      if (strstr(ptr,"inexact")) mask |= FE_INEXACT ;
      if (strstr(ptr,"division")) mask |= FE_DIVBYZERO ;
@@ -588,8 +682,12 @@ ieeeset_(what)
                                     |  FE_INVALID ;
      ctrl = setfpumask(~mask);
      if (mask) {
+	struct sigaction act;
 	/* Call signal handler */
-	signal(SIGFPE,ieeeexf);
+	act.sa_sigaction = ieeeexf;
+	act.sa_mask = SIGABRT;
+	act.sa_flags = SA_SIGINFO;
+	sigaction(SIGFPE,&act,NULL);
      }
    }
 #elif defined (__ppc__)

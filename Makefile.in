@@ -1,0 +1,83 @@
+# Make file for CDSEIS
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+FFLAGS= @FFLAGS@ @ADD_FFLAGS@
+CFLAGS= -w @CFLAGS@ @ADD_CFLAGS@ @DEFS@
+CLIBS= @LIBS@
+FLIBS= @FLIBS@
+BINDIR= @bindir@
+LIBDIR= @LIBDIR@/cdseis
+MANDIR= ${prefix}/man/manl
+SACLIB= @SACLIB@
+CC= @CC@
+F77= @F77@
+TPTT= @TPTT@
+INSTALL= @INSTALL@
+
+FC=${F77}
+
+main: cdseis makelog cdseis.in.scan
+
+all: cdseis makelog make_tt
+
+cdseis:
+	(cd src; \
+	$(MAKE) FC=$(FC) CC=$(CC) FFLAGS="$(FFLAGS)" CFLAGS="$(CFLAGS)" \
+	   SACLIB="$(FLIBS) $(SACLIB)" \
+	   cdseis \
+	)
+
+makelog:
+	(cd src; \
+	$(MAKE) FC=$(FC) CC=$(CC) FFLAGS="$(FFLAGS)" CFLAGS="$(CFLAGS)" \
+	   makelog \
+	)
+
+make_tt:
+	(cd src; \
+	$(MAKE) FC=$(FC) CC=$(CC) FFLAGS="$(FFLAGS)" CFLAGS="$(CFLAGS)" \
+	   TPTT=$(TPTT) \
+	   make_tt \
+	)
+
+cdseis.in.scan: cdseis.in.scan.in Makefile
+	sed -e "s^[@]LIBDIR[@]^$(LIBDIR)^g" < cdseis.in.scan.in > cdseis.in.scan
+	@echo 'After "make install", CDSEIS travel time files (PDIR) will be'
+	@echo "   in ${LIBDIR}"
+
+install:
+	$(MAKE) all
+	$(INSTALL) src/cdseis $(BINDIR)/cdseis
+	$(INSTALL) src/makelog $(BINDIR)/makelog
+	$(INSTALL) cdseis.man $(MANDIR)/cdseis.l
+	$(INSTALL) makelog.man $(MANDIR)/makelog.l
+	test -d $(LIBDIR) || mkdir $(LIBDIR) ; chmod ugo+rx $(LIBDIR)
+	for f in tt_* ; do \
+	   $(INSTALL) $$f $(LIBDIR) ; \
+	done
+	@echo "CDSEIS travel time files (PDIR) installed in ${LIBDIR}"
+
+uninstall:
+	/bin/rm -f $(BINDIR)/cdseis $(BINDIR)/makelog
+	/bin/rm -f $(MANDIR)/cdseis.l $(MANDIR)/makelog.l
+	/bin/rm -rf $(LIBDIR)
+	$(MAKE) distclean
+
+test:	main
+	(cd test; \
+	   echo CDLV-RF.seed | \
+	      ../src/makelog -cat std seed events.dat > CDLV-RF.log \
+	)
+	(cd test; cdseis < cdseis.in)
+	-@test -f /tmp/cdlv.990615a.p.bhz || echo '**Extraction failure (bhz)'
+	-@test -f /tmp/cdlv.990615a.p.bhe || echo '**Extraction failure (bhe)'
+	-@test -f /tmp/cdlv.990615a.p.bhn || echo '**Extraction failure (bhn)'
+
+clean:
+	(cd src; $(MAKE) clean)
+
+distclean: clean
+	(cd src; $(MAKE) distclean)
+	/bin/rm -f Makefile src/.gdb_history ./.gdb_history ./.sachist
+	/bin/rm -f test/makelog.log test/CDLV-RF.log
+	/bin/rm -rf ./autom4te.cache ./config.log ./config.status

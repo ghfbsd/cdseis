@@ -1,2 +1,9 @@
 .DS_Store
 .sachist
+./Makefile
+autom4te.cache
+cdseis.in.scan
+config.log
+config.status
+*.o
+*.orig

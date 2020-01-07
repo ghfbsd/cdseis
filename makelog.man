@@ -1,0 +1,103 @@
+.TH MAKELOG 1 "11 Mar 2003" LOCAL "Bristol Earth Sci."
+.SH NAME
+makelog \- read SEED volumes to make cdseis log files for extracting data
+.SH SYNOPSIS
+.B makelog
+[-s][-d][ -cat {cmt|std} ]
+cddir
+[ catalog ]
+<
+.I "file-list"
+>
+.I "index-list"
+.br
+.SH OPTIONS
+.TP 
+-s
+Dump station information only, don't make a log file.
+This is to obtain information about the locations of the stations with data
+recorded in the SEED volume.
+.TP 
+-d
+Debug.
+Add detailed information about the structure of the SEED volume for debugging
+purposes.
+Repead -d for more detail.
+.TP 
+-cat {cmt|std}
+Catalog type if the volume is not event-oriented.
+Use ``cmt'' if you want to the Harvard CMT catalog format, ``std'' if you have
+a simple list of events of interest.
+.TP 
+catalog
+file name containing catalog information.
+For the Harvard CMT catalog, this must be in the DEK format.
+On the U. Bristol system, this file is /usr/share/data/CMT/cmtdat.
+Alternatively, a ``std'' format catalog consists of lines with:
+.nf
+  year mo day hr mn sec   lat       lon      depth  mb  other mag
+.fi
+An example of an input line might read,
+.nf
+         1998 07 25  02 39 23.30 -13.608   166.867   44.0  5.9  6.0
+.fi
+.SH DESCRIPTION
+.I makelog
+reads SEED volumes and associates the traces in them with events in an
+earthquake catalog.
+This lets you extract the data based on time windows after specific earthquakes.
+The program that extracts the data is
+.IR cdseis (1);
+makelog only prepares the indices that
+.IR cdseis (1)
+uses (which is a significant bit of work in itself).
+.PP
+Some SEED volumes contain event information, but most do not \(em
+specifically, those that result from BREQ_FAST requests from the IRIS DMC
+don't contain any.
+If the volume does not contain event information, you must specify a catalog,
+and the catalog type in order for
+.I makelog
+to work.
+Otherwise, makelog only needs to know where the directory containing the seed
+files is located (given on the command line), and a list of files containing
+the SEED data (from standard input).
+A typical way to run
+.I makelog
+is by typing,
+.nf
+
+     (cd /tmp ; ls *.seed | makelog /tmp) > logfile
+
+.fi
+In this example, the SEED volumes are in the directory /tmp, their names
+end with the suffix ``.seed'', and they implicitly contain event information.
+The output is written to the file called ``logfile'' which will, ultimately,
+be used by
+.IR cdseis (1)
+for further data processing.
+.PP
+To index volumes lacking event information you must provide a catalog type
+and file.
+Again, a typical way to run
+.I makelog
+is,
+.nf
+
+     (cd /tmp ; ls *.seed | \\
+	makelog -cat cmt /tmp /usr/share/data/CMT/cmtdat ) > logfile
+
+.fi
+.PP
+.I makelog
+also produces a file called ``makelog.log'' each time it is run.
+This file contains a summary of the traces that were indexed by the program
+and records any problems reading the volumes.
+Check it to see whether any significant problems are reported (rare, but
+possible because SEED volume format is constantly evolving).
+.SH AUTHORS
+.nf
+George Helffrich, U. Bristol
+.fi
+.SH "SEE ALSO"
+.IR cdseis (1).
