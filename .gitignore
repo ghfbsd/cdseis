@@ -1,6 +1,7 @@
 .DS_Store
 .sachist
 ./Makefile
+git-HOWTO
 autom4te.cache
 cdseis.in.scan
 config.log
