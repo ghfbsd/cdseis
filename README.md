@@ -40,19 +40,19 @@ HOW TO BUILD IT
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
-no output (make_tt).  If a failure occurs, use 
-`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`
-or
-`   ./configure SACAUX=<directory-with-SAC-aux-files>`
+no output (make_tt).  If a failure occurs, use  
+`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
+or  
+`   ./configure SACAUX=<directory-with-SAC-aux-files>`  
 to help the configure process find the SAC libraries.
 
 To print the documentation to the screen or a hardcopy device by:
-`   man cdseis`
-or
-`   man makelog`
+`   man cdseis`  
+or  
+`   man makelog`  
 To get hard copy, use
-`   man -t cdseis > cdseis.ps`
-or `groff -man -t cdseis.man > cdseis.ps`
+`   man -t cdseis > cdseis.ps`  
+or `groff -man -t cdseis.man > cdseis.ps`  
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
 
@@ -165,23 +165,23 @@ Example input for cdseis
 This extracts one three-component seismogram from a SEED volume named
 described in the log file CDLV-RF.log for an earthquake on 15 June 1999.
 
-`comm This extracts three-component seismograms starting before the P wave` 
-`comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It` 
-`comm reads data from the CDROM labeled 5461.` 
-`dmin 85 8 28 0 0` 
-`dmax 85 8 28 23 59` 
-`cdir /cdrom` 
-`logf log5461` 
-`srat 2 16` 
-`phas tt_p` 
-`wind -2 20` 
-`file ev ch` 
-`otyp sac` 
-`wtyp n` 
-`stat` 
-`comp 1` 
-`read` 
-`quit`
+`comm This extracts three-component seismograms starting before the P wave`  
+`comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It`  
+`comm reads data from the CDROM labeled 5461.`  
+`dmin 85 8 28 0 0`  
+`dmax 85 8 28 23 59`  
+`cdir /cdrom`  
+`logf log5461`  
+`srat 2 16`  
+`phas tt_p`  
+`wind -2 20`  
+`file ev ch`  
+`otyp sac`  
+`wtyp n`  
+`stat`  
+`comp 1`  
+`read`  
+`quit`  
 
 This gives 3 files for vertical, north and east components of intermediate-
 period seismograms from a deep-focus earthquake. The vertical
@@ -201,7 +201,7 @@ with the name `*.seed` and to find all of the events associated with data
 traces in the SEED volume with earthquakes in the copy of the CMT catalog in
 `/usr/share/data/CMT/cmtdat`.  The resulting log file is named `logDDIR`.  To
 extract data, you would run cdseis with `cdir DDIR` and `logf logDDIR`.  (See
-[the Global CMT Project] (https://www.globalcmt.org/CMTfiles.html) for CMT
+[the Global CMT Project](https://www.globalcmt.org/CMTfiles.html) for CMT
 catalog download information.)
 
 CHANGES AND BUG FIXES IN CDSEIS 2.0
