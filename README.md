@@ -143,53 +143,66 @@ EXAMPLES
 Example input for cdseis
 ------------------------
 
-`COMM This test file extracts events suitable for P receiver function analysis  
-LDIR ./  
-PDIR ../tt  
-CDIR ./seed  
-ODIR /tmp  
-DMIN 1999 06 15  0  0  
-DMAX 1999 06 15 23 59  
-RANG 30, 95  
-QMAG 0.0, 10.0  
-WIND -2 3  
-PHAS tt_p  
-SRAT 1 100  
-COMP 1  
-FILE st ev p ch  
-LOGF CDLV-RF.log  
-STAT  
-READ  
-QUIT`  
+`COMM This test file extracts events suitable for P receiver function analysis`  
+`LDIR ./`  
+`PDIR ../tt`  
+`CDIR ./seed`  
+`ODIR /tmp`  
+`DMIN 1999 06 15  0  0`  
+`DMAX 1999 06 15 23 59`  
+`RANG 30, 95`  
+`QMAG 0.0, 10.0`  
+`WIND -2 3`  
+`PHAS tt_p`  
+`SRAT 1 100`  
+`COMP 1`  
+`FILE st ev p ch`  
+`LOGF CDLV-RF.log`  
+`STAT`  
+`READ`  
+`QUIT`  
 
 This extracts one three-component seismogram from a SEED volume named
 described in the log file CDLV-RF.log for an earthquake on 15 June 1999.
 
-`comm This extracts three-component seismograms starting before the P wave  
-comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It  
-comm reads data from the CDROM labeled 5461.  
-dmin 85 8 28 0 0  
-dmax 85 8 28 23 59  
-cdir /cdrom  
-logf log5461  
-srat 2 16  
-phas tt_p  
-wind -2 20  
-file ev ch  
-otyp sac  
-wtyp n  
-stat  
-comp 1  
-read  
-quit`
+`comm This extracts three-component seismograms starting before the P wave` 
+`comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It` 
+`comm reads data from the CDROM labeled 5461.` 
+`dmin 85 8 28 0 0` 
+`dmax 85 8 28 23 59` 
+`cdir /cdrom` 
+`logf log5461` 
+`srat 2 16` 
+`phas tt_p` 
+`wind -2 20` 
+`file ev ch` 
+`otyp sac` 
+`wtyp n` 
+`stat` 
+`comp 1` 
+`read` 
+`quit`
 
 This gives 3 files for vertical, north and east components of intermediate-
 period seismograms from a deep-focus earthquake. The vertical
 component seismograms can be displayed using 'read *.ihz' if you have
 SAC running.  Make sure CDROM 5461 is mounted at the directory
-/cdrom. You can get a list of the seismograms by replacing 'read'
+/cdrom. You can get a list of the seismograms by replacing 'read' command by
 by 'scan'.
 
+Example input for makelog
+-------------------------
+
+`(cd DDIR ; ls *.seed | \`  
+`  makelog -cat cmt /tmp /usr/share/data/CMT/cmtdat ) > logDDIR`  
+
+This tells makelog to scan all of the SEED volumes in the directory DDIR ending
+with the name `*.seed` and to find all of the events associated with data
+traces in the SEED volume with earthquakes in the copy of the CMT catalog in
+`/usr/share/data/CMT/cmtdat`.  The resulting log file is named `logDDIR`.  To
+extract data, you would run cdseis with `cdir DDIR` and `logf logDDIR`.  (See
+[the Global CMT Project] (https://www.globalcmt.org/CMTfiles.html) for CMT
+catalog download information.)
 
 CHANGES AND BUG FIXES IN CDSEIS 2.0
 ===================================
