@@ -43,19 +43,19 @@ The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use  
-`   ``./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
+`   ` `./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
 or  
-`   ``./configure SACAUX=<directory-with-SAC-aux-files>`  
+`   ` `./configure SACAUX=<directory-with-SAC-aux-files>`  
 to help the configure process find the SAC libraries.
 
 To print the documentation to the screen or a hardcopy device by:  
-`   ``man cdseis`  
+`   ` `man cdseis`  
 or  
-`   ``man makelog`  
+`   ` `man makelog`  
 To get hard copy, use
-`   ``man -t cdseis > cdseis.ps`  
+`   ` `man -t cdseis > cdseis.ps`  
 or
-`   ``groff -man -t cdseis.man > cdseis.ps`  
+`   ` `groff -man -t cdseis.man > cdseis.ps`  
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
 
@@ -66,8 +66,8 @@ statements in the main program (cdseis.f).  In particular, expert programmers
 might wish to change the default directories for the phase files, and catalog
 files, and the cdroms, which are in variables phsdir, logdir, and cddir.
 
-UNINSTALLING IT
-===============
+HOW TO REMOVE IT
+================
 
 Type
 
@@ -208,7 +208,7 @@ extract data, you would run cdseis with `cdir DDIR` and `logf logDDIR`.  (See
 catalog download information.)
 
 CHANGES AND BUG FIXES IN CDSEIS 2.0
-===================================
+-----------------------------------
 
 1.  The time corrections were given, improperly, as either the first or last
     time correction in the station log.  It now properly interpolates the 
@@ -272,6 +272,7 @@ CHANGES AND BUG FIXES IN CDSEIS 2.0
 
 
 WISHLIST
+--------
 - Change log file format to recognize that different LOCIDs with the same
   sample rate may be present at one station.  At present, if different LOCIDs
   have the same sample rate, they can't all be listed in the log file.  (The
