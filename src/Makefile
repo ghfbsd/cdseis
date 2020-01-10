@@ -29,4 +29,4 @@ clean:
 	/bin/rm -f *.o core output fort.9
 
 distclean: clean
-	/bin/rm -f cdseis makelog convertlog .gdb_history
+	/bin/rm -f cdseis makelog make_tt .gdb_history

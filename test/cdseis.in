@@ -1,6 +1,6 @@
 COMM This test file extracts events suitable for P receiver function analysis
 LDIR ./
-PDIR ../
+PDIR ../tt
 CDIR ./seed
 ODIR /tmp
 DMIN 1999 06 15  0  0

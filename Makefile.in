@@ -52,7 +52,7 @@ install:
 	$(INSTALL) cdseis.man $(MANDIR)/cdseis.l
 	$(INSTALL) makelog.man $(MANDIR)/makelog.l
 	test -d $(LIBDIR) || mkdir $(LIBDIR) ; chmod ugo+rx $(LIBDIR)
-	for f in tt_* ; do \
+	for f in tt/tt_* ; do \
 	   $(INSTALL) $$f $(LIBDIR) ; \
 	done
 	@echo "CDSEIS travel time files (PDIR) installed in ${LIBDIR}"
