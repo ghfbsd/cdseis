@@ -33,7 +33,7 @@ HOW TO BUILD IT
 ===============
 
 |               |                                                          |
-| ------------- | -------------------------------------------------------- |
+| :------------ | :------------------------------------------------------- |
 | `./configure` | `## run configuration - to get help, ./configure --help` |
 | `make`        | `## makes cdseis, makelog, make_tt` |
 | `make test`   | `## extracts SAC traces from a SEED volume for testing` |
@@ -43,18 +43,19 @@ The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use  
-`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
+`   ``./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
 or  
-`   ./configure SACAUX=<directory-with-SAC-aux-files>`  
+`   ``./configure SACAUX=<directory-with-SAC-aux-files>`  
 to help the configure process find the SAC libraries.
 
-To print the documentation to the screen or a hardcopy device by:
-`   man cdseis`  
+To print the documentation to the screen or a hardcopy device by:  
+`   ``man cdseis`  
 or  
-`   man makelog`  
+`   ``man makelog`  
 To get hard copy, use
-`   man -t cdseis > cdseis.ps`  
-or `groff -man -t cdseis.man > cdseis.ps`  
+`   ``man -t cdseis > cdseis.ps`  
+or
+`   ``groff -man -t cdseis.man > cdseis.ps`  
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
 
