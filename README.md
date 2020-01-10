@@ -32,6 +32,7 @@ Please report bugs, suggestions, and comments to G. Helffrich.
 HOW TO BUILD IT
 ===============
 
+|               |                                                          |
 | ------------- | -------------------------------------------------------- |
 | `./configure` | `## run configuration - to get help, ./configure --help` |
 | `make`        | `## makes cdseis, makelog, make_tt` |
