@@ -32,18 +32,19 @@ Please report bugs, suggestions, and comments to G. Helffrich.
 HOW TO BUILD IT
 ===============
 
-`./configure               ## run configuration - to get help, ./configure --help`  
-`make                      ## makes cdseis, makelog, make_tt`  
-`make test                 ## extracts SAC traces from a SEED volume for testing`  
-`make install              ## install programs in binary directory of choice`  
+| ------------- | -------------------------------------------------------- |
+| `./configure` | `## run configuration - to get help, ./configure --help` |
+| `make`        | `## makes cdseis, makelog, make_tt` |
+| `make test`   | `## extracts SAC traces from a SEED volume for testing` |
+| `make install`| `## install programs in binary directory of choice` |
 
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use  
-`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
+`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
 or  
-`   ./configure SACAUX=<directory-with-SAC-aux-files>`  
+`   ./configure SACAUX=<directory-with-SAC-aux-files>`  
 to help the configure process find the SAC libraries.
 
 To print the documentation to the screen or a hardcopy device by:
