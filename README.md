@@ -32,27 +32,27 @@ Please report bugs, suggestions, and comments to G. Helffrich.
 HOW TO BUILD IT
 ===============
 
-./configure               ## run configuration - to get help, ./configure --help
-make                      ## makes cdseis, makelog, make_tt
-make test                 ## extracts SAC traces from a SEED volume for testing
-make install              ## install programs in binary directory of choice
+`./configure               ## run configuration - to get help, ./configure --help`
+`make                      ## makes cdseis, makelog, make_tt`
+`make test                 ## extracts SAC traces from a SEED volume for testing`
+`make install              ## install programs in binary directory of choice`
 
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use 
-   ./configure LDFLAGS='-L<directory-with-libsacio.a>'
+`   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`
 or
-   ./configure SACAUX=<some directory>
+`   ./configure SACAUX=<some directory>`
 to help the configure process find the SAC libraries.
 
 To print the documentation to the screen or a hardcopy device by:
-   man cdseis    
+`   man cdseis`
 or
-   man makelog
+`   man makelog`
 To get hard copy, use
-   man -t cdseis > cdseis.ps
-or groff -man -t cdseis.man > cdseis.ps
+`   man -t cdseis > cdseis.ps`
+or `groff -man -t cdseis.man > cdseis.ps`
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
 
@@ -68,7 +68,7 @@ UNINSTALLING IT
 
 Type
 
-make uninstall
+`make uninstall`
 
 to remove the programs and travel time data files.
 
@@ -110,12 +110,12 @@ working version of it to compile this program.
 by MAKELOG, removes trailing blanks to reduce the file size, and assigns a
 unique event designation to each event.
 
-The programs can be compiled by typing: make all  
-The programs can be tested by typing: make test  
-The programs can be installed by typing: make install  
+The programs can be compiled by typing: `make all`
+The programs can be tested by typing: `make test`
+The programs can be installed by typing: `make install`
 
 Some example (approximate) travel time curves are given in files 
-beginning with tt_ .  They will be installed in a library directory associated
+beginning with `tt_`.  They will be installed in a library directory associated
 with CDSEIS (see cdseis.in.scan for the location; when `make install' is done,
 you'll get a report of the location too).
 
