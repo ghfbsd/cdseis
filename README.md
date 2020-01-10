@@ -32,10 +32,10 @@ Please report bugs, suggestions, and comments to G. Helffrich.
 HOW TO BUILD IT
 ===============
 
-`./configure               ## run configuration - to get help, ./configure --help`
-`make                      ## makes cdseis, makelog, make_tt`
-`make test                 ## extracts SAC traces from a SEED volume for testing`
-`make install              ## install programs in binary directory of choice`
+`./configure               ## run configuration - to get help, ./configure --help`  
+`make                      ## makes cdseis, makelog, make_tt`  
+`make test                 ## extracts SAC traces from a SEED volume for testing`  
+`make install              ## install programs in binary directory of choice`  
 
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
@@ -43,7 +43,7 @@ in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use 
 `   ./configure LDFLAGS='-L<directory-with-libsacio.a>'`
 or
-`   ./configure SACAUX=<some directory>`
+`   ./configure SACAUX=<directory-with-SAC-aux-files>`
 to help the configure process find the SAC libraries.
 
 To print the documentation to the screen or a hardcopy device by:
@@ -86,7 +86,7 @@ are the Global CMT .ndk format or a file with one entry per line (see the
 file test/events.dat for an example or read the program program for format
 details).
 
-Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
+> Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
 all waveform start and stop times, associating each waveform with 
 an event.  On a SUN sparcstation this took about 1-2 hours for each 
 cdrom.  This program also read all the station corrections and instrument
@@ -110,9 +110,9 @@ working version of it to compile this program.
 by MAKELOG, removes trailing blanks to reduce the file size, and assigns a
 unique event designation to each event.
 
-The programs can be compiled by typing: `make all`
-The programs can be tested by typing: `make test`
-The programs can be installed by typing: `make install`
+The programs can be compiled by typing: `make all`  
+The programs can be tested by typing: `make test`  
+The programs can be installed by typing: `make install`  
 
 Some example (approximate) travel time curves are given in files 
 beginning with `tt_`.  They will be installed in a library directory associated
@@ -143,44 +143,44 @@ EXAMPLES
 Example input for cdseis
 ------------------------
 
-`COMM This test file extracts events suitable for P receiver function analysis
-LDIR ./
-PDIR ../tt
-CDIR ./seed
-ODIR /tmp
-DMIN 1999 06 15  0  0
-DMAX 1999 06 15 23 59
-RANG 30, 95
-QMAG 0.0, 10.0
-WIND -2 3
-PHAS tt_p
-SRAT 1 100
-COMP 1
-FILE st ev p ch
-LOGF CDLV-RF.log
-STAT
-READ
-QUIT`
+`COMM This test file extracts events suitable for P receiver function analysis  
+LDIR ./  
+PDIR ../tt  
+CDIR ./seed  
+ODIR /tmp  
+DMIN 1999 06 15  0  0  
+DMAX 1999 06 15 23 59  
+RANG 30, 95  
+QMAG 0.0, 10.0  
+WIND -2 3  
+PHAS tt_p  
+SRAT 1 100  
+COMP 1  
+FILE st ev p ch  
+LOGF CDLV-RF.log  
+STAT  
+READ  
+QUIT`  
 
 This extracts one three-component seismogram from a SEED volume named
 described in the log file CDLV-RF.log for an earthquake on 15 June 1999.
 
-`comm This extracts three-component seismograms starting before the P wave
-comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It
-comm reads data from the CDROM labeled 5461.
-dmin 85 8 28 0 0
-dmax 85 8 28 23 59
-cdir /cdrom
-logf log5461
-srat 2 16
-phas tt_p
-wind -2 20
-file ev ch
-otyp sac
-wtyp n
-stat
-comp 1
-read
+`comm This extracts three-component seismograms starting before the P wave  
+comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It  
+comm reads data from the CDROM labeled 5461.  
+dmin 85 8 28 0 0  
+dmax 85 8 28 23 59  
+cdir /cdrom  
+logf log5461  
+srat 2 16  
+phas tt_p  
+wind -2 20  
+file ev ch  
+otyp sac  
+wtyp n  
+stat  
+comp 1  
+read  
 quit`
 
 This gives 3 files for vertical, north and east components of intermediate-
