@@ -48,23 +48,16 @@ or
 `   ` `./configure SACAUX=<directory-with-SAC-aux-files>`  
 to help the configure process find the SAC libraries.
 
-To print the documentation to the screen or a hardcopy device by:  
+After installing CDSEIS, print the documentation to the screen by:  
 `   ` `man cdseis`  
 or  
 `   ` `man makelog`  
-To get hard copy, use
+To get hard copy, use  
 `   ` `man -t cdseis > cdseis.ps`  
-or
+or  
 `   ` `groff -man -t cdseis.man > cdseis.ps`  
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
-
-> You may wish to change the default values of some of the 
-parameters to suit your particular needs.  They all may be overridden in the
-cdseis input file.  However, the default values are all set in data 
-statements in the main program (cdseis.f).  In particular, expert programmers
-might wish to change the default directories for the phase files, and catalog
-files, and the cdroms, which are in variables phsdir, logdir, and cddir.
 
 HOW TO REMOVE IT
 ================
@@ -140,6 +133,13 @@ subsequet CD's use the UNIX convention.  CDSEIS reads 5054 correctly if the
 variable 'byteswap' in the main program is set to '.false.' and will read 5033
 properly if 'byteswap' is set to '.true.'.
 
+> Though they all may be overridden in the cdseis input file,
+you may wish to change the default values of some of the parameters to suit
+your particular needs.  The default values are all set in data statements in
+the main program (cdseis.f).  In particular, expert programmers
+might wish to change the default directories for the phase files, and catalog
+files, and the cdroms, which are in variables phsdir, logdir, and cddir.
+
 EXAMPLES
 ========
 
@@ -197,7 +197,7 @@ Example input for makelog
 -------------------------
 
 `(cd DDIR ; ls *.seed | \`  
-`  makelog -cat cmt /tmp /usr/share/data/CMT/cmtdat ) > logDDIR`  
+`  makelog -cat cmt DDIR /usr/share/data/CMT/cmtdat ) > logDDIR`  
 
 This tells makelog to scan all of the SEED volumes in the directory DDIR ending
 with the name `*.seed` and to find all of the events associated with data
