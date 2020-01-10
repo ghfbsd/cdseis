@@ -89,16 +89,7 @@ are the Global CMT .ndk format or a file with one entry per line (see the
 file test/events.dat for an example or read the program program for format
 details).
 
-> Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
-all waveform start and stop times, associating each waveform with 
-an event.  On a SUN sparcstation this took about 1-2 hours for each 
-cdrom.  This program also read all the station corrections and instrument
-response poles and zeros, and reported errors and warnings to standard
-output when it does not recognize the format.  CONVERTLOG essentially tidied
-up the output from this program.  (This version of MAKELOG is in the src/cd
-directory for historical completeness.)
-
-2) CDSEIS reads the modified log created by MAKELOG, accepts a 
+2) CDSEIS reads the log file(s) created by MAKELOG, accepts a 
 variety of search parameters in an interactive mode, and either 
 creates a list of available waveforms (without reading data) or 
 retrieves requested waveforms from the SEED volume (or a CD).  
@@ -108,10 +99,6 @@ Kennett and Buland tau-p routines.  CDSEIS uses these tables to calculate
 expected arrival times for extracting data around major phase arrivals.
 The routine uses the subroutine interface to tau-p; you need to have a
 working version of it to compile this program.
-
-4) CONVERTLOG (in src/cd for historical completeness) reads a cdrom log created
-by MAKELOG, removes trailing blanks to reduce the file size, and assigns a
-unique event designation to each event.
 
 The programs can be compiled by typing: `make all`  
 The programs can be tested by typing: `make test`  
@@ -127,6 +114,19 @@ receive.  MAKELOG is now fairly robust in dealing with SEED volumes, and is
 unlikely to fail, but it is possible that MAKELOG could crash on a subsequent
 SEED volume because of some peculiarity associated with new data.  After
 running MAKELOG always check the log file, makelog.log, for errors and warnings.
+
+> Originally, MAKELOG read an entire cdrom and made an ASCII log file of 
+all waveform start and stop times, associating each waveform with 
+an event.  On a SUN sparcstation this took about 1-2 hours for each 
+cdrom.  This program also read all the station corrections and instrument
+response poles and zeros, and reported errors and warnings to standard
+output when it does not recognize the format.  CONVERTLOG essentially tidied
+up the output from this program.  (This version of MAKELOG is in the src/cd
+directory for historical completeness.)
+
+> CONVERTLOG (in src/cd for historical completeness) reads a cdrom log created
+by the old, CD version of MAKELOG, removes trailing blanks to reduce the file
+size, and assigns a unique event designation to each event.
 
 > Logs created by the old MAKELOG and CONVERTLOG for almost all CDs that were
 ever distributed by seismological agencies are supplied in the directory
