@@ -179,8 +179,11 @@ READ
 QUIT  
 ```
 
-This extracts one three-component seismogram from a SEED volume named
-described in the log file CDLV-RF.log for an earthquake on 15 June 1999.
+The input file above illustrates a typical use of CDSEIS in a research
+project to get the data from repository format (SEED) into an analysis format
+(SAC).  A list of the available seismograms could be obtained by replacing the
+`READ` command with the `SCAN` command.
+
 
 ```
 comm This extracts three-component seismograms starting before the P wave
