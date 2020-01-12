@@ -1,3 +1,6 @@
+WHAT IT DOES
+============
+
 CDSEIS reads seismic data from SEED volumes and writes SAC (or AH) files for
 analysis.  Unlike other SEED-reading tools, the files that it outputs are event
 oriented, cut around the arrival times of specific (user-tailored) phases, and
@@ -17,45 +20,48 @@ CDSEIS uses a command language (similar to PLOTXY, etc.) to decide which
 waveforms to extract.  The basic idea is to define a number of search parameters
 which are used to select which seismograms to read.  The defaults defined for
 most of the parameters minimize user input.  CDSEIS reads the input file and
-outputs seismograms.
-
-Originally, CDSEIS was written to extract data from GDSN CD-ROMs, but it was
-expanded to work with SEED-oriented datasets.  CDSEIS was written by Peter
-Shearer (1989) to run on a Macintosh.  Ken Creager added several options and
-modified the code to run in a UNIX environment.  Tom McSweeney wrote the
-routine write_ah.c.  Doug Wiens wrote an early version of the instrument
-response reader.  George Helffrich added SAC output and implemented reading
-of SEED volumes, and is responsible for continued maintenance of CDSEIS.
-
-Please report bugs, suggestions, and comments to G. Helffrich.
+outputs either a list of seismograms matching the search criteria (`SCAN`)or the
+seismograms themselves (`READ`).
 
 HOW TO BUILD IT
 ===============
 
-|               |                                                          |
-| :------------ | :------------------------------------------------------- |
-| `./configure` | `## run configuration - to get help, ./configure --help` |
-| `make`        | `## makes cdseis, makelog, make_tt` |
-| `make test`   | `## extracts SAC traces from a SEED volume for testing` |
-| `make install`| `## install programs in binary directory of choice` |
+```
+./configure        ## run configuration - to get help, ./configure --help
+make               ## makes cdseis, makelog, make_tt
+make test          ## extracts SAC traces from a SEED volume for testing
+make install       ## install programs in binary directory of choice
+```
 
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
 no output (make_tt).  If a failure occurs, use  
-`   ` `./configure LDFLAGS='-L<directory-with-libsacio.a>'`  
+```
+    ./configure LDFLAGS='-L<directory-with-libsacio.a>'
+```
 or  
-`   ` `./configure SACAUX=<directory-with-SAC-aux-files>`  
+```
+    ./configure SACAUX=<directory-with-SAC-aux-files>
+```
 to help the configure process find the SAC libraries.
 
 After installing CDSEIS, print the documentation to the screen by:  
-`   ` `man cdseis`  
+```
+    man cdseis
+```
 or  
-`   ` `man makelog`  
+```
+    man makelog
+```
 To get hard copy, use  
-`   ` `man -t cdseis > cdseis.ps`  
+```
+    man -t cdseis > cdseis.ps
+```
 or  
-`   ` `groff -man -t cdseis.man > cdseis.ps`  
+```
+    groff -man -t cdseis.man > cdseis.ps
+```
 and view cdseis.ps with your favorite PostScript reader.  Use similar methods
 to get makelog documentation.
 
@@ -64,7 +70,9 @@ HOW TO REMOVE IT
 
 Type
 
-`make uninstall`
+```
+make uninstall
+```
 
 to remove the programs and travel time data files.
 
@@ -146,45 +154,53 @@ EXAMPLES
 Example input for cdseis
 ------------------------
 
-`COMM This test file extracts events suitable for P receiver function analysis`  
-`LDIR ./`  
-`PDIR ../tt`  
-`CDIR ./seed`  
-`ODIR /tmp`  
-`DMIN 1999 06 15  0  0`  
-`DMAX 1999 06 15 23 59`  
-`RANG 30, 95`  
-`QMAG 0.0, 10.0`  
-`WIND -2 3`  
-`PHAS tt_p`  
-`SRAT 1 100`  
-`COMP 1`  
-`FILE st ev p ch`  
-`LOGF CDLV-RF.log`  
-`STAT`  
-`READ`  
-`QUIT`  
+```
+COMM This test file extracts events suitable for P receiver function analysis
+COMM from the SEED volumes described in CDLV-RF.log.  All events between 30
+COMM and 95 degrees with magnitudes between 5.8 and 10 are selected.  CDSEIS
+COMM outputs traces in a time window 2 minutes before the P arrival and 3
+COMM after it for each station.  Three-component seismograms are produced,
+COMM labeled with the station name, event name, p, and channel name (*h[enz]),
+COMM depending on the sample rate (between 1 and 100 sps).
+LDIR ./  
+PDIR ../tt  
+CDIR ./seed  
+ODIR /tmp  
+RANG 30, 95  
+QMAG 5.8, 10.0  
+WIND -2 3  
+PHAS tt_p  
+SRAT 1 100  
+COMP 1  
+FILE st ev p ch  
+LOGF CDLV-RF.log  
+STAT  
+READ  
+QUIT  
+```
 
 This extracts one three-component seismogram from a SEED volume named
 described in the log file CDLV-RF.log for an earthquake on 15 June 1999.
 
-`comm This extracts three-component seismograms starting before the P wave`  
-`comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It`  
-`comm reads data from the CDROM labeled 5461.`  
-`dmin 85 8 28 0 0`  
-`dmax 85 8 28 23 59`  
-`cdir /cdrom`  
-`logf log5461`  
-`srat 2 16`  
-`phas tt_p`  
-`wind -2 20`  
-`file ev ch`  
-`otyp sac`  
-`wtyp n`  
-`stat`  
-`comp 1`  
-`read`  
-`quit`  
+```
+comm This extracts three-component seismograms starting before the P wave
+comm arrival to 20 minutes after it, for an event on 28 Aug. 1985.  It
+comm reads data from the CDROM labeled 5461.
+dmin 85 8 28 0 0
+dmax 85 8 28 23 59
+cdir /cdrom
+logf log5461
+srat 2 16
+phas tt_p
+wind -2 20
+file ev ch
+otyp sac
+wtyp n
+stat
+comp 1
+read
+quit
+```
 
 This gives 3 files for vertical, north and east components of intermediate-
 period seismograms from a deep-focus earthquake. The vertical
@@ -196,8 +212,10 @@ by 'scan'.
 Example input for makelog
 -------------------------
 
-`(cd DDIR ; ls *.seed | \`  
-`  makelog -cat cmt DDIR /usr/share/data/CMT/cmtdat ) > logDDIR`  
+```
+(cd DDIR ; ls *.seed | \
+   makelog -cat cmt DDIR /usr/share/data/CMT/cmtdat ) > logDDIR
+```
 
 This tells makelog to scan all of the SEED volumes in the directory DDIR ending
 with the name `*.seed` and to find all of the events associated with data
@@ -206,6 +224,19 @@ traces in the SEED volume with earthquakes in the copy of the CMT catalog in
 extract data, you would run cdseis with `cdir DDIR` and `logf logDDIR`.  (See
 [the Global CMT Project](https://www.globalcmt.org/CMTfiles.html) for CMT
 catalog download information.)
+
+CREDITS
+-------
+
+CDSEIS was originally written to extract data from GDSN CD-ROMs. Subsequently,
+it was expanded to work with SEED-oriented datasets.  CDSEIS was written by
+Peter Shearer (1989) to run on a Macintosh.  Ken Creager added several options
+and modified the code to run in a UNIX environment.  Tom McSweeney wrote the
+routine write_ah.c.  Doug Wiens wrote an early version of the instrument
+response reader.  George Helffrich added SAC output and implemented reading
+of SEED volumes, and is responsible for continued maintenance of CDSEIS.
+
+Please report bugs, suggestions, and comments to G. Helffrich.
 
 CHANGES AND BUG FIXES IN CDSEIS 2.0
 -----------------------------------
@@ -217,7 +248,7 @@ CHANGES AND BUG FIXES IN CDSEIS 2.0
     followed by LP.
 3.  ##Data output in AH format now has gain reported in counts/meter, instead
     of counts/micrometer.##
-4.  Cdseis now reads the band (short-period, long-period, etc.) from the 
+4.  CDSEIS now reads the band (short-period, long-period, etc.) from the 
     station log, and puts this in the filename if requested.  The channel
     name in the headers is converted to SEED format (eg LHZ for long-period
     high gain, vertical).  Channel used to be called VERT for vertical.
