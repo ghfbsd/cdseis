@@ -5,23 +5,24 @@ CDSEIS reads seismic data from SEED volumes and writes SAC (or AH) files for
 analysis.  Unlike other SEED-reading tools, the files that it outputs are event
 oriented, cut around the arrival times of specific (user-tailored) phases, and
 named using event-specific names.  The files have event and station information
-populating the header information for the files.  The result is a collection of
-traces that is immediately available for analysis.
+populating the file headers. The result is a collection of traces that is
+immediately available for analysis.
 
-To select waveforms for analysis, CDSEIS uses an ascii index log file, made by
-MAKELOG for each SEED volume (or CD).  The logs summarize the waveform start
-and stop times and associates each waveform with an event.  The user specifies
-various search parameters to identify the desired seismograms.  Once the desired
-time windows are identified, they can then be read directly from the SEED volume
-or CD.  The use of an index file results in greatly increased speed compared to
-searching through the entire SEED volume or CD to find the desired time series.
+To select waveforms for analysis, CDSEIS uses a text index (log file) made by
+MAKELOG for each SEED volume (or collection).  The logs summarize the waveform
+start and stop times and associates each waveform with an event.  The user
+specifies various search parameters to identify the desired seismograms.  Once
+the desired time windows are identified, they can then be read directly from the
+SEED volume.  The use of an index file results in greatly increased speed
+compared to searching through the entire SEED volume to find the desired time
+series.
 
 CDSEIS uses a command language (similar to PLOTXY, etc.) to decide which
 waveforms to extract.  The basic idea is to define a number of search parameters
-which are used to select which seismograms to read.  The defaults defined for
-most of the parameters minimize user input.  CDSEIS reads the input file and
-outputs either a list of seismograms matching the search criteria (`SCAN`)or the
-seismograms themselves (`READ`).
+that are used to select which seismograms to read.  The defaults defined for
+most of the parameters minimize user input.  CDSEIS reads the search commands
+and outputs either a list of seismograms matching the search criteria (`SCAN`
+option) or the seismograms themselves (`READ` option).
 
 HOW TO BUILD IT
 ===============
@@ -36,29 +37,29 @@ make install       ## install programs in binary directory of choice
 The configure step tries to find the SAC libraries (for cdseis) and the
 Buland & Kennett tau-p routines (for make_tt).  If they are not available, or
 in an unexpected place, compilation will either fail (cdseis) or will produce
-no output (make_tt).  If a failure occurs, use  
+no output (make_tt).  If a failure occurs, use
 ```
     ./configure LDFLAGS='-L<directory-with-libsacio.a>'
 ```
-or  
+or
 ```
     ./configure SACAUX=<directory-with-SAC-aux-files>
 ```
 to help the configure process find the SAC libraries.
 
-After installing CDSEIS, print the documentation to the screen by:  
+After installing CDSEIS, print the documentation to the screen by:
 ```
     man cdseis
 ```
-or  
+or
 ```
     man makelog
 ```
-To get hard copy, use  
+To get hard copy, use
 ```
     man -t cdseis > cdseis.ps
 ```
-or  
+or
 ```
     groff -man -t cdseis.man > cdseis.ps
 ```
@@ -69,11 +70,9 @@ HOW TO REMOVE IT
 ================
 
 Type
-
 ```
 make uninstall
 ```
-
 to remove the programs and travel time data files.
 
 USAGE
