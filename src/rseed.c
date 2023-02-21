@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -52,6 +53,8 @@ typedef struct _drh_ DATA_RECORD_HEADER;
 
 typedef unsigned char BOOL;
 
+typedef unsigned char uchar;
+
 enum blockette1000key {
    kASCII = 1,
    kINT16 = 2,
@@ -75,7 +78,7 @@ enum blockette1000key {
    kRSTN = 34,
 };
 
-short pow2[16] = {
+unsigned short pow2[16] = {
    1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768
 };
 
@@ -118,7 +121,7 @@ __asm ("bswap %0" : "=r" (__x) : "0" (__x));
 #define CDSN_SHIFT 14		/* # bits in mantissa */
 #define CDSN_MAX14 0x1fff		/* maximum 14 bit positive # */
 
-static void decode_cdsn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_cdsn (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
 
    short *temp;			/* recovers sample from SEED */
    int mantissa;		/* mantissa from SEED data */
@@ -152,7 +155,7 @@ static void decode_cdsn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
    }
 }
 
-static void decode_dwwssn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_dwwssn (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    short int word, *ptr;	
    int mantissa;
    int i;	
@@ -167,7 +170,7 @@ static void decode_dwwssn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 #define ECH_SHIFT 12			/* # bits in mantissa */
 #define ECH_MAX12 0x7ff			/* maximum 12 bit positive # */
 
-static void decode_echery (char *data_ptr, int nsamples, float pt[], BOOL swp) {
+static void decode_echery (uchar *data_ptr, int nsamples, float pt[], BOOL swp){
    short int *ptr, word;
    int mantissa;			/* mantissa from SEED data */
    int gainrange;			/* gain range factor */
@@ -197,7 +200,7 @@ static void decode_echery (char *data_ptr, int nsamples, float pt[], BOOL swp) {
 #define KHC_MAX12 0x7ff			/* maximum 12 bit positive # */
 #define KHC_MAX24 0x7fffff		/* maximum 24 bit positive # */
 
-static void decode_esstf (char *data_ptr, int nsamples, float pt[], BOOL swp) {
+static void decode_esstf (uchar *data_ptr, int nsamples, float pt[], BOOL swp) {
    int *temp;				
    int mantissa;			
    int exponent;
@@ -228,7 +231,7 @@ static void decode_esstf (char *data_ptr, int nsamples, float pt[], BOOL swp) {
 #define GEO_MAX12 0x7ff			/* maximum 12 bit positive # */
 #define GEO_MAX24 0x7fffff		/* maximum 24 bit positive # */
 
-static void decode_geoscope (char *p, int nsamp, float pt[],
+static void decode_geoscope (uchar *p, int nsamp, float pt[],
    BOOL swp, enum blockette1000key key, short sch) {
    unsigned char *data_ptr;
    short *temp, samp;			/* recovers sample from SEED */
@@ -248,6 +251,9 @@ static void decode_geoscope (char *p, int nsamp, float pt[],
       break;
    case kGEOMINT24:
       k = 3;
+      break;
+   default:
+      return;
    }
 
    for (i = 0, data_ptr = (unsigned char *)p; i < nsamp; i++) {
@@ -272,6 +278,8 @@ static void decode_geoscope (char *p, int nsamp, float pt[],
 	 if (mantissa > GEO_MAX24) mantissa -= 2 * (GEO_MAX24 + 1);
 	 pt[i] = mantissa;
 	 break;
+      default:
+         /* NOTREACHED */;
       }
    }
 }
@@ -280,7 +288,7 @@ static void decode_geoscope (char *p, int nsamp, float pt[],
 #define GRF_GAINRANGE_MASK 0x000f	/* mask for gainrange factor */
 #define GRF_SHIFT  4			/* # bits in mantissa */
 
-static void decode_graef (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_graef (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int mantissa;				/* mantissa from SEED data */
    int gainrange;				/* gain range factor */
    int i;					/* counter */
@@ -302,7 +310,7 @@ static void decode_graef (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 }
 
 
-static void decode_ieeefloat (char *data_ptr, int nsamples, float pt[],
+static void decode_ieeefloat (uchar *data_ptr, int nsamples, float pt[],
                               BOOL swp) {
    int *temp;				/* recovers sample from SEED */
    float *float_ptr;			/* float pointer*/
@@ -314,7 +322,7 @@ static void decode_ieeefloat (char *data_ptr, int nsamples, float pt[],
 
 }
 
-static void decode_knmi (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_knmi (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    unsigned char *ptr;
    int mantissa;		
    int gainrange;	
@@ -332,7 +340,7 @@ static void decode_knmi (char *data_ptr, int nsamp, float pt[], BOOL swp) {
    }
 }
 
-static void decode_lju (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_lju (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int i;			/* counter */
    unsigned short *ptr;
    int word;
@@ -347,7 +355,7 @@ static void decode_lju (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 
 #define REF_MAX16 0x7fff		/* maximum 16 bit positive # */
 
-static void decode_16bit (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_16bit (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int i;			/* counter */
    unsigned short *ptr;
    int word;
@@ -363,7 +371,7 @@ static void decode_16bit (char *data_ptr, int nsamp, float pt[], BOOL swp) {
    }
 }
 
-static void decode_24bit (unsigned char *data_ptr, int nsamp, float pt[],
+static void decode_24bit (uchar *data_ptr, int nsamp, float pt[],
                           BOOL swp) {
    int i;
    unsigned char *ptr;
@@ -379,7 +387,7 @@ static void decode_24bit (unsigned char *data_ptr, int nsamp, float pt[],
    }
 }
 
-static void decode_32bit (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_32bit (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int i;					/* counter */
    unsigned int *ptr, word;
 
@@ -395,7 +403,7 @@ static void decode_32bit (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 #define RSTN_GAINRANGE_MASK 0xd000	/* mask for gainrange factor */
 #define RSTN_SHIFT 14			/* # bits in mantissa */
 
-static void decode_rstn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_rstn (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int mantissa;			/* mantissa from SEED data */
    int gainrange;			/* gain range factor */
    int i;				/* counter */
@@ -416,7 +424,7 @@ static void decode_rstn (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 #define SRO_GAINRANGE_MASK 0xf000	/* mask for gainrange factor */
 #define SRO_SHIFT 12			/* # bits in mantissa */
 
-static void decode_sro (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_sro (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int gainrange;			/* gain range factor */
    int i;				/* counter */
    unsigned short word, *ptr;
@@ -444,7 +452,7 @@ static void decode_sro (char *data_ptr, int nsamp, float pt[], BOOL swp) {
 #define ST_MAX32 0x7fffffff		/* maximum 32 bit positive # */
 #define ST_ELEM_FRAME 16		/* # elements per data frame */
 
-static void decode_steim (char *data_ptr, int nsamples, float pt[], BOOL swp,
+static void decode_steim (uchar *data_ptr, int nsamples, float pt[], BOOL swp,
    enum blockette1000key key, int dl) {
    short int *temp_2byte;		/* temp for byte swapping */
    int *temp_4byte;			/* temp for byte swapping */
@@ -550,7 +558,10 @@ static void decode_steim (char *data_ptr, int nsamples, float pt[], BOOL swp,
 			pt[counter++] = last_value = (double) val + last_value;
 		     }
 		     data_ptr += 4;
-		  }}
+		  }
+                  default:
+                     /* NOTREACHED */;
+                  }
 		  break;
 
 	       case 3:/* type 3, 1 differences */
@@ -582,7 +593,10 @@ static void decode_steim (char *data_ptr, int nsamples, float pt[], BOOL swp,
 			pt[counter++] = last_value = (double) val + last_value;
 		     }
 		     data_ptr += 4;
-		  }}
+		  }
+                  default:
+                     /* NOTREACHED */;
+                  }
 		  break;
 
 	       case 0:/* type 0, not data */
@@ -599,7 +613,7 @@ static void decode_steim (char *data_ptr, int nsamples, float pt[], BOOL swp,
 #define UKK_GAINRANGE_MASK 0x000f	/* mask for gainrange factor */
 #define UKK_SHIFT  4			/* # bits in mantissa */
 
-static void decode_ukkel_c (char *data_ptr, int nsamples, float pt[],
+static void decode_ukkel_c (uchar *data_ptr, int nsamples, float pt[],
                             BOOL swp) {
    unsigned short *ptr, temp;
    int mantissa;			/* mantissa from SEED data */
@@ -796,7 +810,7 @@ int idat[],icmp[];
    *eod = 0;
 
 /* Unpack the frame key fields. */
-   gnible(icmp,key,&ipt,4,2,2,0);
+   gnible((char*)icmp,key,&ipt,4,2,2,0);
 
 /* If the integration constant is over 2**30 or we are using 32-bit 
    differences we better bail. */
@@ -830,7 +844,7 @@ int idat[],icmp[];
       ln = (nib[1][jb] <= maxx-js) ? nib[1][jb] : maxx-js;
       ln = (ln <= npt) ? ln : npt;
 /* Unpack the data. */
-      gnible(icmp,&idat[js],&ipt,nib[0][jb],ln,nib[1][jb],1);
+      gnible((char*)icmp,&idat[js],&ipt,nib[0][jb],ln,nib[1][jb],1);
 /* Update pointers and counters. */
       js = js+ln;
       npt = npt-ln;
@@ -868,7 +882,7 @@ int idat[],icmp[];
 
 /* Check the end of block back pointer. */
    nct = ipt-nct;
-   gnible(icmp,&ict,&ipt,8,1,1,0);
+   gnible((char*)icmp,&ict,&ipt,8,1,1,0);
    if(ict != nct)
    {
       if(prnt)
@@ -878,7 +892,7 @@ int idat[],icmp[];
    }
    nct = ipt-1;
    if(*fin == 0 || ipt > USN_NBK-4) return;
-   gnible(icmp,&lpt,&ipt,8,1,1,0);
+   gnible((char*)icmp,&lpt,&ipt,8,1,1,0);
    if(lpt == 0) return;
 
 /* For the last record of the series, check consistency. */
@@ -892,7 +906,7 @@ int idat[],icmp[];
       if(ldcmprs>=0) ldcmprs = -5;
    }
    ipt = USN_NBK-3;
-   gnible(icmp,&ian,&ipt,32,1,1,1);
+   gnible((char*)icmp,&ian,&ipt,32,1,1,1);
 /* Check that the reverse integration constant is as expected. */
    if(idat[*n] != ian)
    {
@@ -925,8 +939,8 @@ int idat[],icmp[];
 /* Get the forward integration contstant and the number of samples in the
    record.  Initialize internal variables. */
    ipt = 1;
-   gnible(icmp,&ia0,&ipt,32,1,1,1);
-   gnible(icmp,&npt,&ipt,16,1,1,0);
+   gnible((char*)icmp,&ia0,&ipt,32,1,1,1);
+   gnible((char*)icmp,&npt,&ipt,16,1,1,0);
    ifr = 0;
    ipt = USN_NST;
    nct = ipt-1;
@@ -974,7 +988,7 @@ int idat[],icmp[];
    }
 }
 
-static void decode_usnsn(char *data_ptr, int ns, float pt[], BOOL swp, int dl) {
+static void decode_usnsn(uchar *data_ptr, int ns, float pt[], BOOL swp, int dl){
    int i, error, n = -1, eod, overflow;
    static int *buff = NULL;
    static int buff_size = 0;
@@ -991,14 +1005,14 @@ static void decode_usnsn(char *data_ptr, int ns, float pt[], BOOL swp, int dl) {
 	buff[i] = swap_4byte(buff[i]);
    }
 
-   error = dcmprs(ns, &n, buff, &eod, &overflow, data_ptr);	
+   error = dcmprs(ns, &n, buff, &eod, &overflow, (int*)data_ptr);
 
    for (i = 0; i <= n; i++) pt[i] = (float)buff[i];
 
 }
 
 
-static void decode_unknown (char *data_ptr, int nsamp, float pt[], BOOL swp) {
+static void decode_unknown (uchar *data_ptr, int nsamp, float pt[], BOOL swp) {
    int i;				
 
    for (i = 0; i <  nsamp; i++) pt[i] = 0.0;
@@ -1065,7 +1079,7 @@ static float extract_sps ( short sample_rate, short sample_rate_multiplier) {
 int32_t rseed(
    char *key,
    int32_t *sch,
-   char *buf,
+   uchar *buf,
    int32_t *ndata,
    float data[],
    int32_t *nsamp,
@@ -1079,7 +1093,8 @@ int32_t rseed(
    int dix, nix, ns, dlen, bod;
    int dyear, djday, dhour, dmin, dsec, dcns;
    float sps, acc, *dat;
-   char b1kkey = 0, *ptr_to_data;
+   char b1kkey = 0;
+   unsigned char *ptr_to_data;
    static float *buff = NULL;
    static int buff_size = 0;
 
@@ -1110,7 +1125,7 @@ int32_t rseed(
 	 char           reserved;
       } *p;
 
-      if (swp && SWAPPED16(drh->fb) > buf_len || !swp && drh->fb > buf_len) {
+      if ((swp && SWAPPED16(drh->fb)>buf_len) || (!swp && drh->fb > buf_len)) {
          fprintf(stderr, "**RSEED:  Can't tell if byte-swapped blockettes!\n");
 	 *nsamp = 0;
 	 return buf_len;
@@ -1173,7 +1188,7 @@ int32_t rseed(
    stim[3] = drh->btime.min;
    stim[4] = drh->btime.sec;
    stim[5] = swp ? SWAPPED16(drh->btime.cns):drh->btime.cns;
-   if (drh->aflg & 0x02 == 0) /* Apply time-correction to start-time */
+   if ((drh->aflg & 0x02) == 0) /* Apply time-correction to start-time */
       stim[5] += swp ? SWAPPED16(drh->tc):drh->tc;
 
    /* If no data to return in this blockette, skip processing */

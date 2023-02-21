@@ -1,6 +1,6 @@
 .DS_Store
 .sachist
-./Makefile
+Makefile
 git-HOWTO
 autom4te.cache
 cdseis.in.scan
@@ -8,3 +8,7 @@ config.log
 config.status
 *.o
 *.orig
+*.dSYM
+src/rdseed-5.3.1/
+src/resptest
+test/*.log

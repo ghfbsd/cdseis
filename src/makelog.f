@@ -433,10 +433,12 @@ C              Parse subset of hypocentral location.
 90742          format(i6,i2,a23)
                tnall = tnall + 1
 	       if (tnall .gt. MAXSEG) stop '**Too many time segments!'
-	       read(bkette,90741,end=47,err=47) vsta,loc,vchan,timbeg
+	       read(bkette,90741,end=47,err=47) vsta,loc,vchan
+               timbeg = bkette(18:)
 	       j = index(timbeg,'~') + 18
 	       read(bkette(j:),90742,end=47,err=47)
-     &            tsblok(tnall),i2,timend
+     &            tsblok(tnall),i2
+               timend = bkette(j+8:)
 	       j = index(timend,'~') + j + 8
 	       read(bkette(j:),90742,end=47,err=47) iblk,i2
 	       tsdur(tnall) = timdif(timend,timbeg)

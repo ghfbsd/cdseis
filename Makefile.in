@@ -68,10 +68,14 @@ test:	main
 	   echo CDLV-RF.seed | \
 	      ../src/makelog -cat std seed events.dat > CDLV-RF.log \
 	)
-	(cd test; cdseis < cdseis.in)
+	(cd test; ../src/cdseis < cdseis.in)
 	-@test -f /tmp/cdlv.990615a.p.bhz || echo '**Extraction failure (bhz)'
 	-@test -f /tmp/cdlv.990615a.p.bhe || echo '**Extraction failure (bhe)'
 	-@test -f /tmp/cdlv.990615a.p.bhn || echo '**Extraction failure (bhn)'
+	-@for s in bhz bhe bhn; do \
+	     test -f /tmp/cdlv.990615a.p.$$s.resp || \
+                echo '**Response file failure ($$s)' ; \
+        done
 
 clean:
 	(cd src; $(MAKE) clean)

@@ -5,7 +5,7 @@
      .       sta,stype,scomm,slat,slon,selev,srate,
      .       kk,del,eazi,sazi,sjday,
      .       syear,smonth,sday,shour,smin,ssec,
-     .       co,gain,units,a0,np,poles,nz,zeros,
+     .       co,gain,units,a0,np,poles,nz,zeros,rtype,
      .       tt,timebuf,tcor,delref,ttref,ndata,data1,data2,data3)
 
 c  write waveform data in AH, ASC or SAC format depending on 'outtyp'
@@ -68,6 +68,7 @@ c   np           I*4(3)    = number of poles in instrument responses
 c   poles        C*4(30,3) = complex array containing poles for three components
 c   nz           I*4(3)    = number of zeros in instrument responses
 c   zeros        C*4(30,3) = complex array containing zeros for three components
+c   rtype        C*(*)     = response type 'RESP' or 'PZ'
 c   tt           R*4       = travel time of phase of interest (min)
 c   timebuf      R*4       = start time of data with respect to origin time of e
 c   tcor         R*4       = clock correction (s) applied to start time
@@ -95,7 +96,7 @@ c   extra(0:20)  R*4   = extra reals, 18,19,20 contain delref,ttref,and tt if tt
       real      data1(dim),data2(dim),data3(dim)
       integer   plflag, eyear, emonth, eday, ehour, emin
       integer   syear, smonth, sday, shour, smin
-      character code*6, chan*6, llog*202, scomm*(*)
+      character code*6, chan*6, llog*202, scomm*(*), rtype*(*)
       integer   np(3),nz(3)
       real      gain(3),a0(3),co(3),emag(2)
       complex   poles(30,3),zeros(30,3)
@@ -118,9 +119,10 @@ c   dmax         R*4 maximum value of data
       real      srate, dmin, dmax, norm, meands, delta, mean, rms, var
       real      maxamp_plot, y_shift
       logical   op
-      character ecoment*80,rcoment*80,ot*20,st*20,filename*128
+      character ecoment*80,rcoment*80,ot*20,st*20
+      character filename*128,respname*128
       character comp(3)*1,temp_str*80
-      integer   type
+      integer   type, dumpresp
       integer*2 type2
       integer write_ah, write_asc, write_sac
       data fpfx /'123456789abcdefghijklmnopqrstuvwxyz'/
@@ -363,21 +365,24 @@ c    write SAC output file
               ndat= write_sac
      .        (evntid,
      .        filename,wrtype,code,chan,stype,slat,slon,selev,co(1),
-     .        meands,norm,poler,zeror,polei,zeroi,elat,elon,edep,emag,
+     .        meands,norm,
+     .        rtype,poler,zeror,polei,zeroi,elat,elon,edep,emag,
      .        ot,ecoment,type2,ndata,delta,eazi,st,absmin,rcoment,
      .        llog,extra(0),data1)
             else if (kkk.eq.2) then
               ndat= write_sac
      .        (evntid,
      .        filename,wrtype,code,chan,stype,slat,slon,selev,co(2),
-     .        meands,norm,poler,zeror,polei,zeroi,elat,elon,edep,emag,
+     .        meands,norm,
+     .        rtype,poler,zeror,polei,zeroi,elat,elon,edep,emag,
      .        ot,ecoment,type2,ndata,delta,eazi,st,absmin,rcoment,
      .        llog,extra(0),data2)
             else if (kkk.eq.3) then
               ndat= write_sac
      .        (evntid,
      .        filename,wrtype,code,chan,stype,slat,slon,selev,co(3),
-     .        meands,norm,poler,zeror,polei,zeroi,elat,elon,edep,emag,
+     .        meands,norm,
+     .        rtype,poler,zeror,polei,zeroi,elat,elon,edep,emag,
      .        ot,ecoment,type2,ndata,delta,eazi,st,absmin,rcoment,
      .        llog,extra(0),data3)
             endif
@@ -398,6 +403,23 @@ c    write SAC output file
           else if (ndat .ne. ndata) then
              write(*,'(a,2i8)')' File writing error,ndata,ndat=',
      .         ndata,ndat
+          else if (rtype .eq. 'RESP') then
+             respname=filename(1:lenb(filename)) // '.resp'
+             isf1 = index(stype,'~')
+             isf2 = index(stype(isf1+1:),'~')
+C            call setkhv('KSTNM',code,nerr)
+C            call setkhv('KCMPNM',chan,nerr)
+C            call setkhv('KINST',stype(isf1+1:isf1+isf2-1),nerr)
+C            call setkhv('KEVNM',evntid,nerr)
+C            call setkhv('KNETWK',stype(1:isf1-1),nerr)
+C            if (stype(isf1+isf2+1:isf1+isf2+2) .ne. '  ')
+C    &          call setkhv('KHOLE',stype(isf1+isf2+1:),nerr)
+             i = dumpresp(respname(1:lenb(respname)),
+     .              stype(1:isf1-1), code, chan, stype(isf1+isf2+1:),
+     .              rcoment(1:lenb(rcoment)), llog(1:lenb(llog)))
+             if (i .ne. 0) write(*,'(a,a)')
+     .          ' Response file write error for ',
+     .          filename(1:lenb(filename))
           end if
 	
 
@@ -528,7 +550,7 @@ c       -NOTE write_ah can not open a file and append to it
       write (iout,'(a,1x,a)')     'log:',          llog(1:80)
       write (iout,'(a)')          'extras:'
       do 6, i=0,20
-         write (iout,'(i2,a,4x,e14.3))') i, ':', extra(i)
+         write (iout,'(i2,a,4x,e14.3)') i, ':', extra(i)
     6 continue
       write (iout,'(a)')          'data:'
       do 7,i=1,ndata

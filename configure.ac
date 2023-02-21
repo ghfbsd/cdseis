@@ -45,7 +45,7 @@ FFLAGS=`echo "${KEEP}"`
 
 AC_SUBST(ADD_FFLAGS)
 AC_SUBST(ADD_CFLAGS)
-AC_SUBST(SACLIB)
+AC_ARG_VAR(SACLIB,[sets the explicit location of the SAC I/O library])
 AC_SUBST(TPTT)
 AC_SUBST(FLIBS)
 AC_ARG_VAR(BINDIR,[CDSEIS program and utility executable code])
@@ -69,19 +69,23 @@ AC_CHECK_FILE(
 
 dnl SAC I/O library check
 AC_LANG_PUSH([Fortran 77])
-AC_SEARCH_LIBS(
-   [wsac0],[sacio],
-   [SACLIB=-lsacio],
-   [for d in /usr/local/lib $SACAUX}/.. notfound ; do
-       test -f $d/libsacio.a && break
-    done
-    test $d = notfound && {
-      echo '**' ;
-      echo "**No SAC library found -- re-configure with" ;
-      echo "** ./configure LDFLAGS='-Lpath-to-libsacio.a'" ;
-      echo '**' ; } || SACLIB=$d/libsacio.a
-   ]
-)
+if test "${SACLIB+set}" = set; then
+   echo "SACLIB is ${SACLIB}"
+else
+   AC_SEARCH_LIBS(
+      [wsac0],[sacio],
+      [SACLIB=-lsacio],
+      [for d in /usr/local/lib $SACAUX}/.. notfound ; do
+          test -f $d/libsacio.a && break
+       done
+       test $d = notfound && {
+         echo '**' ;
+         echo "**No SAC library found -- re-configure with" ;
+         echo "** ./configure LDFLAGS='-Lpath-to-libsacio.a'" ;
+         echo '**' ; } || SACLIB=$d/libsacio.a
+      ]
+   )
+fi
 AC_LANG_POP([Fortran 77])
 
 dnl Semi-exotic types
@@ -198,6 +202,12 @@ dnl indexing)
 #       i = index(' \t','t')
 # ],[ADD_FFLAGS="${ADD_FFLAGS} -fno-aggressive-loop-optimizations"],[])
 
+dnl Check for Fortran -std=legacy option
+FFLAGS="-c -std=legacy"
+AC_TRY_COMPILE([],[
+      i = index(' \t','t')
+],[ADD_FFLAGS="${ADD_FFLAGS} -std=legacy"],[])
+
 dnl Check Fortran for brief debug info availability
 FFLAGS="-g -feliminate-unused-debug-symbols"
 AC_TRY_COMPILE([],[
@@ -256,4 +266,4 @@ AC_ARG_ENABLE(opt,
 
 AC_OUTPUT(Makefile)
 echo "      Configured with C compiler flags" $CFLAGS $ADD_CFLAGS
-echo "Configured with Fortran compiler flags" $FFLAGS $ADD_FFLAGS
+echo "Configured with Fortran compiler flags" $FFLAGS $ADD_FFLAGS $SACLIB

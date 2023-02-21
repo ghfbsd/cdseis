@@ -233,7 +233,7 @@ int llog, lcode, lchan, lstype;
 
 	if(test_first1 && (strcmp(filename, "stdin") == 0
 			|| strcmp(filename, "STDIN") == 0)) {
-		test_first1 == 0;
+		test_first1 = 0;
 		xdrstdio_create(&xdr_in, stdin, XDR_DECODE);
 	}
 	else if((fptr1 == NULL || strcmp(filename, old_filename) != 0)

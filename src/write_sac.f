@@ -1,6 +1,6 @@
       integer function write_sac(evntid,filename,wtype,code,
      +   chan, stype, slat, slon, elev, cad, DS, A0, 
-     +   rpol, rzro, ipol, izro, 
+     +   rtype, rpol, rzro, ipol, izro, 
      +   lat, lon, dep, mag, ot, ecomment, 
      +   type, ndata, delta, eazi, abstime, rmin, rcomment,
      +   log, extra, data_in)
@@ -75,38 +75,40 @@ C
 C       (12) A0:	A float (real*4) that gives the normalization of the
 C       		station
 C
-C       (13) rpol:	A float (real*4) array by 30 containing the real
+C       (13) rtype:     Character string 'RESP' or 'PZ' giving response type.
+C
+C       (14) rpol:	A float (real*4) array by 30 containing the real
 C       		part of the poles of the station calibration.  The
 C       		first element of this array is taken as the number
 C       		of poles in the AH filter library.
 C
-C       (14) rzro:	A float (real*4) array by 30 containing the real
+C       (15) rzro:	A float (real*4) array by 30 containing the real
 C       		part of the zeros of the station calibration.  The
 C       		first element of this array is taken as the number
 C       		of zeros in the AH filter library.
 C
-C       (15) ipol:	A float (real*4) array by 30 containing the imaginary
+C       (16) ipol:	A float (real*4) array by 30 containing the imaginary
 C       		part of the poles of the station calibration.  The
 C       		first element of this array is ignored by the AH filter
 C       		library.
 C
-C       (16) izro:	A float (real*4) array by 30 containing the imaginary
+C       (17) izro:	A float (real*4) array by 30 containing the imaginary
 C       		part of the zeros of the station calibration.  The
 C       		first element of this array is ignored by the AH filter
 C       		library.
 C
-C       (17) lat:	a float (real*4) that gives the latitude of the
+C       (18) lat:	a float (real*4) that gives the latitude of the
 C       		earthquake in decimal degrees
 C
-C       (18) lon:	a float (real*4) that gives the longitude of the
+C       (19) lon:	a float (real*4) that gives the longitude of the
 C       		earthquake in decimal degrees
 C
-C       (19) dep:	a float (real*4) that gives the depth of the earthquake
+C       (20) dep:	a float (real*4) that gives the depth of the earthquake
 C       		in kilometers
 C
-C       (20) mag:	a float (real*4) array giving log file `mb' and `ms'
+C       (21) mag:	a float (real*4) array giving log file `mb' and `ms'
 C
-C       (21) ot:	a character string containing the origin time of the
+C       (22) ot:	a character string containing the origin time of the
 C       		earthquake in yyyymodyhrmmss.## format, where the yy, mo,
 C       		dy, hr, and mm are converted to short (integer*2)
 C       		format, and as such should be of an i2 format (format
@@ -128,11 +130,11 @@ C       		other data points that are being passed as part of
 C       		the argument list when placing the null character at
 C       		the end of the string ot.
 C
-C       (22) ecomment:	a character string by 80 that contains any special
+C       (23) ecomment:	a character string by 80 that contains any special
 C       		comments that the user wishes to make about the
 C       		earthquake
 C
-C       (23) type:	a short (integer*2) number that tells the program
+C       (24) type:	a short (integer*2) number that tells the program
 C       		the type of data represented in the data_in array
 C       		(see below).  The choices are;
 C
@@ -145,7 +147,7 @@ C       	can be seen in the definition of data_in below, but some
 C       	relatively minor changes could be made to the code to support
 C       	other data types if desired.
 C
-C       (24) ndata:	a long (integer*4) variable that gives the number of
+C       (25) ndata:	a long (integer*4) variable that gives the number of
 C       		data points in the input routine.  Note:  if the data
 C       		is complex, then it should appear as multiplexed data
 C       		in the data_in array (real1, imaginary1, real2, etc.)
@@ -153,30 +155,30 @@ C       		but ndata would be the number of complex data points,
 C       		not the total number of real and imaginary numbers
 C       		in the array.
 C
-C       (25) delta:	a float (real*4) that gives the sampling rate
+C       (26) delta:	a float (real*4) that gives the sampling rate
 C       		(in seconds per sample) of the data
 C
-C       (26) eazi:    	a float(real*4) that gives the earthquake back-azimuth
+C       (27) eazi:    	a float(real*4) that gives the earthquake back-azimuth
 C       		from the station (in degrees)
 C
-C       (27) abstime:	a character string (see ot above for format) that
+C       (28) abstime:	a character string (see ot above for format) that
 C       		gives the start time of the record
 C
-C       (28) rmin:	a float (real*4) that gives the minimum value
+C       (29) rmin:	a float (real*4) that gives the minimum value
 C       		of the abscissa
 C
-C       (29) rcomment:	a character string by 80 that contains comments about
+C       (30) rcomment:	a character string by 80 that contains comments about
 C       		the record
 C
-C       (30) log:	a character string by 202 that contains a record of the
+C       (31) log:	a character string by 202 that contains a record of the
 C       		operations that have been performed on the data in
 C       		the record
 C
-C       (31) extra:	a float (real*4) array by 21 that contains space for
+C       (32) extra:	a float (real*4) array by 21 that contains space for
 C       		any extra real numbers that the user might want to save
 C       		(essentially yours to do with as you please)
 C
-C       (32) data_in:	a variable length float (real*4) array of the
+C       (33) data_in:	a variable length float (real*4) array of the
 C       		amplitudes that are to be saved in the record.  As
 C       		mentioned above, complex and vector data should be
 C       		contained in the array in a multiplexed manner, as
@@ -230,6 +232,8 @@ C          Add network and instrument type
 C          GRH 27 Dec 09
 C          Add LOCID
 C          GRH 11 Nov 15
+C          Add RESP output
+C          GRH 20 Feb 23
 C       
       integer*2 type
       integer ndata
@@ -237,7 +241,7 @@ C
       real delta, eazi, rmin, extra(21), data_in(ndata)
       real rpol(30), rzro(30), ipol(30), izro(30), mag(2)
       character*(*) evntid, filename, wtype, ot, abstime
-      character*(*) ecomment, rcomment, log, code, chan, stype
+      character*(*) ecomment, rcomment, log, code, chan, stype, rtype
       character fntest*256
       logical exists
 
@@ -381,33 +385,35 @@ C       See if output file exists.
 	if (exists) go to 91
 	call wsac0(fntest,data_in,data_in,nerr)
 	if (nerr .ne. 0) go to 92
-C       Write poles and zeroes file.  This includes file ID, event and
-C          record comments, and log of actions taken.
+C       Write poles and zeroes file, if wanted.  This includes file ID, event
+C          and record comments, and log of actions taken.
 C       Digital sensitivity (DS or gain) is in the file header variable
 C          SCALE.
-	fntest = filename(1:index(filename,' ')-1)//'.pz'
-	inquire(file=fntest,exist=exists)
-	if (exists) go to 91
-	open(iunit,file=fntest)
-	write(iunit,1001,err=92) filename(1:index(filename,' ')-1)
-	if (ecomment .ne. 'none') 
-     &     write(iunit,1001,err=92) ecomment(1:lenb(ecomment))
-	if (rcomment .ne. 'none') 
-     &     write(iunit,1001,err=92) rcomment(1:lenb(rcomment))
-	if (lenb(log) .ne. 0 .and. log .ne. 'none') 
-     &     write(iunit,1001,err=92) log(1:lenb(log))
-	write(iunit,1005,err=92) ds,a0
-	write(iunit,1002,err=92) ifix(rpol(1))
-	do 12 i=1,ifix(rpol(1))
-	   j = i+1
-	   write(iunit,1003,err=92) rpol(j),ipol(j)
-12      continue
-        write(iunit,1004,err=92) ifix(rzro(1))
-	do 14 i=1,ifix(rzro(1))
-	   j = i+1
-	   write(iunit,1003,err=92) rzro(j),izro(j)
-14      continue
-	close(iunit)
+        if (rtype.eq.'PZ') then
+	   fntest = filename(1:index(filename,' ')-1)//'.pz'
+	   inquire(file=fntest,exist=exists)
+	   if (exists) go to 91
+	   open(iunit,file=fntest)
+	   write(iunit,1001,err=92) filename(1:index(filename,' ')-1)
+	   if (ecomment .ne. 'none') 
+     &        write(iunit,1001,err=92) ecomment(1:lenb(ecomment))
+	   if (rcomment .ne. 'none') 
+     &        write(iunit,1001,err=92) rcomment(1:lenb(rcomment))
+	   if (lenb(log) .ne. 0 .and. log .ne. 'none') 
+     &        write(iunit,1001,err=92) log(1:lenb(log))
+	   write(iunit,1005,err=92) ds,a0
+	   write(iunit,1002,err=92) ifix(rpol(1))
+	   do 12 i=1,ifix(rpol(1))
+	      j = i+1
+	      write(iunit,1003,err=92) rpol(j),ipol(j)
+12         continue
+           write(iunit,1004,err=92) ifix(rzro(1))
+	   do 14 i=1,ifix(rzro(1))
+	      j = i+1
+	      write(iunit,1003,err=92) rzro(j),izro(j)
+14         continue
+	   close(iunit)
+        endif
 	write_sac = ndata
 	return
 1001    format('* ',a)

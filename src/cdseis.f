@@ -22,6 +22,9 @@ c      native reading of seed data; don't use rseed as co-process
 c  version 003: 04/1/2011
 c      handle separately byte-swapped mseed headers and data
 c      handle time-dependent, multiple responses in station records
+c  version 004: 21/2/2023
+c      output EVALRESP responses
+c      improve error message on bad command inputs
 
 c  Please report bugs, problems or comments to:
 c      Ken Creager
@@ -42,7 +45,7 @@ c      (206) 685-2803
       real mcolat,mcolon,mcolat1,mcolat2,mcolon1,mcolon2,binmax
       real pcolat,pcolon,pdello,pdelhi
       real qazi1,qazi2,sazi1,sazi2,time1,time2,srat1,srat2,bin0,bininc
-      integer nbin,ndim,debug
+      integer nbin,ndim,debug,readresp
       parameter (ndim=100000)
       real xdata(10),timebuf(ndim),data1(ndim),data2(ndim),data3(ndim)
       real stnrat(3),yamp(3)
@@ -54,10 +57,10 @@ c      (206) 685-2803
       character phase*40,ttfile(10)*40,phsfil(10)*80,exfilenm*40,exst*5
       character*20 filecode(20),chdata(20),statid*5,chanid*4,phsid(10)*6
       character stname(10)*5,phasid*6,evntid*8,chan(3)*4,units*20
-      character outfil*128,outdir*40,fname*128,wtype*2,outtyp*4
+      character outfil*128,outdir*40,fname*128,wtype*2,outtyp*4,rtype*4
       character*12 timcor(12)
       integer nfilec,lenb,lendir,plflag,nsta
-      logical quake_ok,needstinfo,readnext
+      logical quake_ok,needstinfo,readnext,gotresp
       integer np(3),nz(3)
       real gain(3),a0(3)
       complex poles(30,3),zeros(30,3)
@@ -90,7 +93,7 @@ c default values follow
       data logdir/'/data4/kcc/cdseis'/
       data phsdir/'/data4/kcc/cdseis'/
 c     data outtyp/'ah  '/, wtype/'a '/
-      data outtyp/'sac '/, wtype/'n '/
+      data outtyp/'sac '/, wtype/'n '/, rtype/'RESP'/
       data ttwrite/0/
       data bin0,bininc,binmax,nbin/90.,5.,90.,0/
       data plflag,kk,debug/0,10,0/
@@ -98,7 +101,7 @@ c     data outtyp/'ah  '/, wtype/'a '/
       filecode(1)='ah.data'
 c
 c     call ieeeset('environment')
-      print *,'CDSEIS 2.0 (grh-003)'
+      print *,'CDSEIS 2.0 (grh-004)'
 10    print *,'Enter commands'
       call ASK(code,line,nfound,xdata,nerr)
       if (nerr.eq.0) go to 11
@@ -114,6 +117,7 @@ c     call ieeeset('environment')
       if (code.eq.'otyp') go to 11
       if (code.eq.'wtyp') go to 11
       if (code.eq.'stol') go to 11
+      if (code.eq.'resp') go to 11
       if (code.eq.'comm' .or. code(1:1).eq.'*') go to 11
          print *,'***ERROR in input, nerr= ',nerr
          go to 10
@@ -123,8 +127,9 @@ c
 c        Comment command -- does nothing.
 	 go to 10
       else if (code.eq.'dmin') then
+53       format('***',a,' - Wrong number of input parameters')
          if (nfound.ne.5) then
-            print *,'***Wrong number of input parameters'
+            print 53,'DMIN'
             go to 10
          end if
          yr1=nint(xdata(1))
@@ -134,7 +139,7 @@ c        Comment command -- does nothing.
          mn1=nint(xdata(5))
       else if (code.eq.'dmax') then
          if (nfound.ne.5) then
-            print *,'***Wrong number of input parameters'
+            print 53,'DMAX'
             go to 10
          end if
          yr2=nint(xdata(1))
@@ -144,7 +149,7 @@ c        Comment command -- does nothing.
          mn2=nint(xdata(5))
       else if (code.eq.'qloc') then
          if (nfound.ne.4) then
-            print *,'***Wrong number of input parameters'
+            print 53,'QLOC'
             go to 10
          end if
          qcolat1=xdata(1)
@@ -153,21 +158,21 @@ c        Comment command -- does nothing.
          qcolon2=xdata(4)
       else if (code.eq.'qdep') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'QDEP'
             go to 10
          end if
          qdep1=xdata(1)
          qdep2=xdata(2)
       else if (code.eq.'qmag') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'QMAG'
             go to 10
          end if
          qmag1=xdata(1)
          qmag2=xdata(2)
       else if (code.eq.'sloc') then
          if (nfound.ne.4) then
-            print *,'***Wrong number of input parameters'
+            print 53,'SLOC'
             go to 10
          end if
          scolat1=xdata(1)
@@ -177,7 +182,7 @@ c        Comment command -- does nothing.
          needstinfo=.true.
       else if (code.eq.'mloc') then
          if (nfound.ne.4) then
-            print *,'***Wrong number of input parameters'
+            print 53,'MLOC'
             go to 10
          end if
          mcolat1=xdata(1)
@@ -185,6 +190,20 @@ c        Comment command -- does nothing.
          mcolat2=xdata(2)
          mcolon2=xdata(4)
          needstinfo=.true.
+      else if (code.eq.'resp') then
+         call parse(line,chdata,iii)
+         if (iii.ne.1) then
+            print 53,'RESP'
+            go to 10
+         end if
+         if (chdata(1).eq.'RESP'.or.chdata(1).eq.'resp') then
+            rtype='RESP'
+         elseif (chdata(1).eq.'PZ'.or.chdata(1).eq.'pz') then
+            rtype='PZ'
+         else
+            print *,'***RESP - must be RESP or PZ--retry'
+            go to 10
+         endif
       else if (code.eq.'snam') then
          if ((line(1:3).eq.'ALL').or.(line(1:3).eq.'all')) then
             stname(1)='all'
@@ -197,14 +216,14 @@ c        Comment command -- does nothing.
          endif
       else if (code.eq.'rang') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'RANG'
             go to 10
          end if
          del1=xdata(1)
          del2=xdata(2)
       else if (code.eq.'prng') then
 	 if (nfound.ne.4) then
-            print *,'***Wrong number of input parameters'
+            print 53,'PRNG'
             go to 10
          end if
 	 pcolat=xdata(1)
@@ -213,57 +232,57 @@ c        Comment command -- does nothing.
 	 pdelhi=xdata(4)
       else if (code.eq.'qazi') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'QAZI'
             go to 10
          end if
          qazi1=xdata(1)
          qazi2=xdata(2)
       else if (code.eq.'sazi') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'SAZI'
             go to 10
          end if
          sazi1=xdata(1)
          sazi2=xdata(2)
       else if (code.eq.'wind') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'WIND'
             go to 10
          end if
          time1=xdata(1)
          time2=xdata(2)
       else if (code.eq.'srat') then
          if (nfound.ne.2) then
-            print *,'***Wrong number of input parameters'
+            print 53,'SRAT'
             go to 10
          end if
          srat1=xdata(1)
          srat2=xdata(2)
       else if (code.eq.'sync') then
          if (nfound.ne.1) then
-            print *,'***Wrong number of input parameters'
+            print 53,'SYNC'
             go to 10
          end if
          gapmax=xdata(1)
       else if (code.eq.'stol') then
          if (nfound.ne.1) then
-            print *,'***Wrong number of input parameters'
+            print 53,'STAT'
             go to 10
          end if
          stol=0.01*xdata(1)
       else if (code.eq.'comp') then
          if (nfound.ne.1) then
-            print *,'***Wrong number of input parameters'
+            print 53,'COMP'
             go to 10
          end if
          kk=nint(xdata(1))
          if ((kk.lt.1).or.(kk.gt.10)) then
-            print *,'***Unkown value of COMP'
+            print *,'***COMP - unkown value'
             goto 10
          endif
       else if (code.eq.'ttwr') then
          if (nfound.ne.1) then
-            print *,'***Wrong number of input parameters'
+            print 53,'TTWR'
             go to 10
          else if (xdata(1).ne.1..and.xdata(1).ne.0.) then
             print *,'***TTWR must be 0 or 1--retry'
@@ -325,6 +344,8 @@ c        Comment command -- does nothing.
 44       format ('ODIR: Output directory name:         ',a)
          print 36,(filecode(i)(1:lenb(filecode(i))), i=1,nfilec)
 36       format ('FILE: Output file name:              ',10(a,1x))
+         print 52,rtype
+52       format ('RESP: Response type:                 ',a)
          print 49,plflag
 49       format ('PLTS: Write plot.sh line to stnd out:',i4,' ')
          print 45,outtyp
@@ -350,7 +371,7 @@ c        Comment command -- does nothing.
          print *,'DMIN DMAX QLOC QDEP QMAG SLOC RANG QAZI SAZI MLOC'
          print *,'WIND SRAT SYNC COMP SNAM LOGF LDIR FILE PLTS OTYP'
          print *,'WTYP BINS PHAS PDIR TTWR STAT HELP EXTF SCAN READ'
-         print *,'PRNG COMM *    QUIT'
+         print *,'PRNG RESP COMM *    QUIT'
       else if (code.eq.'logf') then
           logname=line
       else if (code.eq.'odir') then
@@ -364,14 +385,14 @@ c        Comment command -- does nothing.
       else if (code.eq.'otyp') then
           if (line(1:3).ne.'asc'.and.line(1:2).ne.'ah'.and.
      &        line(1:3).ne.'sac') then
-             print *,' options are sac, asc or ah; retry'
+             print *,'***OTYP options are sac, asc or ah; retry'
           else
              outtyp=line(1:4)
           endif
       else if (code.eq.'wtyp') then
           if (line(1:1).ne.'a'.and.line(1:1).ne.'w'.and.
      .        line(1:1).ne.'n'.and.line(1:1).ne.'x') then
-             print *,' options are a (append), w (overwrite) ',
+             print *,'WTYP options are a (append), w (overwrite) ',
      .               'n (new name), x (no data output); retry'
           else
              wtype=line(1:1)
@@ -380,13 +401,13 @@ c        Comment command -- does nothing.
          call parse(line,filecode,nfilec)
       else if (code.eq.'plts') then
          if (nfound.ne.1) then
-            print *,'***Wrong number of input parameters'
+            print 53,'PLTS'
             go to 10
          end if
          plflag=int(xdata(1))
       else if (code.eq.'bins') then
          if (nfound.ne.3) then
-            print *,'***Wrong number of input parameters'
+            print 53,'BINS'
             go to 10
          end if
          bin0=  xdata(1)
@@ -394,6 +415,10 @@ c        Comment command -- does nothing.
          bininc=xdata(3)
          nbin=int((binmax+.01-bin0)/bininc)
       else if (code.eq.'debu') then
+         if (nfound.ne.1) then
+            print 53,'DEBU'
+            go to 10
+         end if
          debug=xdata(1)
       else if (code.eq.'phas') then
          phase=line(1:40)
@@ -431,7 +456,7 @@ c        Comment command -- does nothing.
       else if (code.eq.'scan'.or.code.eq.'read') then
          if (code.eq.'scan') then
             if (nfound.gt.1) then
-               print *,'***Wrong number of input parameters'
+               print 53,code
                go to 10
             endif
             if (nfound .ne. 1) then
@@ -582,6 +607,7 @@ c
             go to 115
          endif
 484      continue
+         gotresp = .false.
          if (cdfile(1:5) .eq. 'seed ') then
 	    read (linebuf,'(5x,i4,3f6.1)') irecnum,del,sazi,qazi
 	 else
@@ -666,12 +692,18 @@ c               print 132, tt1,tt2
                endif
                if(code.eq.'scan'.and.nscan.eq.0) go to 150
 
+               irok = -1
 	       if (cdfile(1:5) .eq. 'seed ') then
+                  if (.not.gotresp) then
+                     irok = readresp(cddir(1:lenb(cddir)) // '/' //
+     &                               cdfile(6:lenb(cdfile)))
+                     gotresp = .true.
+                  endif
 		  call EXTSEED(cdfile,cddir,stnamecur,sr,stol,
      &                      kk,qyr,qmon,qdy,qhr,qmn,qsc,qazi,tt1,tt2,
      &                      slat,slon,selev,stype,scomm,chan,
      &                      npts,ndim,timebuf,data1,data2,data3,co,
-     &                      yamp,gain,units,a0,np,poles,nz,zeros,
+     &                      yamp,gain,units,a0,np,poles,nz,zeros,rtype,
      &                      ncor,timcor,cor,debug)
 	       else
                   call EXTRACT(cdfile,cddir,nrec,stnamecur,irecnum,sr,
@@ -682,7 +714,7 @@ c               print 132, tt1,tt2
      &                      ncor,timcor,cor,debug)
 	       endif
                if (npts.le.1) go to 150
-                 print *,' Station log comments: ',scomm(1:lenb(scomm))
+               print *,' Station log comments: ',scomm(1:lenb(scomm))
 c               chanid=' '
 c               if (sr.eq.1.) then
 c                  chanid(1:1)='l'
@@ -702,11 +734,11 @@ c               chanid(2:2)='#'
                lendir=lenb(outdir)
                if (lendir.gt.0) then
                  outfil=outdir(1:lendir)//'/'//
-     .                fname(evntid,statid(1:lenb(statid)),chanid,phasid,
-     .                      filecode,nfilec)
+     .                fname(evntid,statid(1:lenb(statid)),
+     .                chanid,phasid,filecode,nfilec)
                else
-               outfil=fname(evntid,statid(1:lenb(statid)),chanid,phasid,
-     .                      filecode,nfilec)
+                 outfil=fname(evntid,statid(1:lenb(statid)),
+     .                 chanid,phasid,filecode,nfilec)
                endif
                j1=1
                do 135 j=2,npts
@@ -733,8 +765,8 @@ c  apply it to the entire time series.
      &                    qlat,qlon,qdep,qmb,qms,stnamecur,stype,scomm,
      &                    slat,slon,selev,sr,kk,del,qazi,sazi,sjday,
      &                    syr,smon,sdy,shr,smn,ssc,
-     &                    co,gain,units,a0,np,poles,nz,zeros,tt,timest,
-     &                    tcor,delref,ttref,
+     &                    co,gain,units,a0,np,poles,nz,zeros,rtype,
+     &                    tt,timest, tcor,delref,ttref,
      &                    jtot,data1(j1),data2(j1),data3(j1))
                      print 134,timebuf(j1)+tcor,timebuf(j2)+tcor,jtot
 134                  format ('BLOCK WRITTEN:',f7.2,' to ',f7.2,
@@ -755,14 +787,14 @@ c  apply it to the entire time series.
                call ADDTIME(qyr,qmon,qdy,qhr,qmn,qsc,
      &                      timest,syr,smon,sdy,shr,smn,ssc)
                call GETJDAY(syr,smon,sdy,sjday)
-                     call datout
+               call datout
      &                   (outfil,wtype,outtyp,evntid,chan,phasid,
      &                    ttwrite,plflag,qyr,qmon,qdy,qhr,qmn,qsc,
      &                    qlat,qlon,qdep,qmb,qms,stnamecur,stype,scomm,
      &                    slat,slon,selev,sr,kk,del,qazi,sazi,sjday,
      &                    syr,smon,sdy,shr,smn,ssc,
-     &                    co,gain,units,a0,np,poles,nz,zeros,tt,timest,
-     &                    tcor,delref,ttref,
+     &                    co,gain,units,a0,np,poles,nz,zeros,rtype,
+     &                    tt,timest,tcor,delref,ttref,
      &                    jtot,data1(j1),data2(j1),data3(j1))
                print 134,timebuf(j1)+tcor/60.,timebuf(j2)+tcor/60.,jtot
 
@@ -770,6 +802,7 @@ c loop over columns in line (different sample rates)
 150      continue
 c loop over phase files
 155      continue
+         if (gotresp) call freeresp
 c
          go to 115
 160      close (12)
@@ -785,7 +818,7 @@ c
          close(22)
          go to 900
       else
-         print *,'Command not found'
+         print '(a,a)','Command not found: ',code
       end if
       go to 10
 c

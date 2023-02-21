@@ -708,6 +708,7 @@ LIBS
 CPPFLAGS
 F77
 FFLAGS
+SACLIB
 BINDIR
 LIBDIR
 SACAUX
@@ -1340,6 +1341,7 @@ Some influential environment variables:
               you have headers in a nonstandard directory <include dir>
   F77         Fortran 77 compiler command
   FFLAGS      Fortran 77 compiler flags
+  SACLIB      sets the explicit location of the SAC I/O library
   BINDIR      CDSEIS program and utility executable code
   LIBDIR      SAC library code (sac.a)
   SACAUX      CDSEIS auxiliary files (defaults to LIBDIR/aux)
@@ -3538,7 +3540,10 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing wsac0" >&5
+if test "${SACLIB+set}" = set; then
+   echo "SACLIB is ${SACLIB}"
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing wsac0" >&5
 $as_echo_n "checking for library containing wsac0... " >&6; }
 if ${ac_cv_search_wsac0+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -3581,17 +3586,18 @@ if test "$ac_res" != no; then :
   SACLIB=-lsacio
 else
   for d in /usr/local/lib $SACAUX}/.. notfound ; do
-       test -f $d/libsacio.a && break
-    done
-    test $d = notfound && {
-      echo '**' ;
-      echo "**No SAC library found -- re-configure with" ;
-      echo "** ./configure LDFLAGS='-Lpath-to-libsacio.a'" ;
-      echo '**' ; } || SACLIB=$d/libsacio.a
+          test -f $d/libsacio.a && break
+       done
+       test $d = notfound && {
+         echo '**' ;
+         echo "**No SAC library found -- re-configure with" ;
+         echo "** ./configure LDFLAGS='-Lpath-to-libsacio.a'" ;
+         echo '**' ; } || SACLIB=$d/libsacio.a
 
 
 fi
 
+fi
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4444,6 +4450,19 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 # AC_TRY_COMPILE([],[
 #       i = index(' \t','t')
 # ],[ADD_FFLAGS="${ADD_FFLAGS} -fno-aggressive-loop-optimizations"],[])
+
+FFLAGS="-c -std=legacy"
+cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      i = index(' \t','t')
+
+      end
+_ACEOF
+if ac_fn_f77_try_compile "$LINENO"; then :
+  ADD_FFLAGS="${ADD_FFLAGS} -std=legacy"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 FFLAGS="-g -feliminate-unused-debug-symbols"
 cat > conftest.$ac_ext <<_ACEOF
@@ -5715,4 +5734,4 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 echo "      Configured with C compiler flags" $CFLAGS $ADD_CFLAGS
-echo "Configured with Fortran compiler flags" $FFLAGS $ADD_FFLAGS
+echo "Configured with Fortran compiler flags" $FFLAGS $ADD_FFLAGS $SACLIB

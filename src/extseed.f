@@ -35,6 +35,7 @@ c               t1      = start time (minutes relative to event)
 c               t2      = end time
 c               kk      : 1=(z,n,e)  2=(z,r,t)  3=(n,e)  4(r,t)
 c                         5=z  6=n  7=e  8=r  9=t 10=any
+c               rtype   = (char*4) response type: RESP or PZ
 c               debug   = if>=1 Write verbose output 
 c     Returns:  sr      = actual sample rate (Hz)
 c               stlat   = station latitude
@@ -85,7 +86,8 @@ c
      &      kk,qyr,qmon,qdy,qhr,qmn,qsc,qazi,t1,t2,
      &      stlat,stlon,stelev,stype,stcomm,chan,
      &      npts,ndim,timebuf,zbuf,buf2,buf3,co,
-     &      yamp,gain,units,a0,np,poles,nz,zeros,ncor,timcor,cor,debug)
+     &      yamp,gain,units,a0,np,poles,nz,zeros,rtype,
+     &      ncor,timcor,cor,debug)
       integer debug
       integer qyr,qmon,qdy,qhr,qmn
       integer kk
@@ -93,7 +95,7 @@ c
       integer nn(3),np(3),nz(3),ncor
       character timcor(12)*(*)
       character chan(3)*(*),units*(*)
-      character stname*8,locname*8,snam*(*),stype*(*)
+      character stname*8,locname*8,snam*(*),stype*(*),rtype*(*)
       character cdfile*(*),header*25,cdfil*128,cddir*(*),file*128
       character cdfprv*128
       character stcomm*(*),diget*70
@@ -112,7 +114,7 @@ c
       integer lendir,lenfil,lenb,tsamp(6)
       integer rseed,getbkt,getdat,gtstr,rdget,rdint
       character zne23*6,rsfx(3)*3,chgot(3)*5,chnow*5,stcomm0*70
-      character vsta*5,vloc*2,vchan*3,timbeg*23,timend*23,v22*23,v1*1
+      character vsta*5,vloc*2,vchan*3,timbeg*23,timend*23
       equivalence (nn(1),n1),(nn(2),n2),(nn(3),n3)
       parameter (nssmax=8, ndbmax=256, ndfmax=20)
       integer stgix(nssmax), dfid(ndfmax)
@@ -125,7 +127,7 @@ c
       include 'extseed.com'
       parameter (ndlim=MAXBL)
       real samp(ndlim)
-      character bkette*(MAXBL),bkid*3,v30*31,v50*51
+      character bkette*(MAXBL),bkid*3,v30*31,v50*51,v22*23,v1*1
       character effbeg*23, effend*23
       equivalence (bkette(1:3),bkid), (bkette,samp)
       external rename,stat
@@ -331,10 +333,11 @@ c           030 - extract name and format id; translate name to upper case
      &                2(1x,i6))
 90741          format(3x,4x,a5,a2,a3,a23)
 90742          format(i6,i2,a23)
-               read(bkette,90741,end=37,err=37) vsta,vloc,vchan,v22
+               read(bkette,90741,end=37,err=37) vsta,vloc,vchan
+               v22 = bkette(18:)
 	       j = 18 + gtstr(timbeg,v22)
-	       read(bkette(j:),90742,end=37,err=37)
-     &            ixdbeg,i2,v22
+	       read(bkette(j:),90742,end=37,err=37) ixdbeg,i2
+               v22 = bkette(j+8:)
                j = j + 8 + gtstr(timend,v22)
 	       read(bkette(j:),90742,end=37,err=37) ixdend,i2
 	       exists = inspan(timbeg,timend,

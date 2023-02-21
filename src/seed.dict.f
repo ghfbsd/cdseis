@@ -139,8 +139,10 @@ C        oustr - string value
       ix = index(instr,'~')
       if (ix .eq. 0) then
 	 write(0,*) '**STRGET:  Unterminated string.'
-	 gtstr = 0
-	 return
+         do ix=len(instr),1,-1
+            if (instr(ix:ix) .ne. ' ') exit
+         enddo
+         ix = ix + 1
       endif
       if (ix .gt. 1) then
 	 oustr = instr(1:ix-1)

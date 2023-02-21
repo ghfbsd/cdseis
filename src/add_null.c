@@ -10,7 +10,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-add_null(s, len, where)
+int add_null(s, len, where)
 int len;
 char *s, where;
 {

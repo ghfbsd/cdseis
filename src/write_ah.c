@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <rpc/rpc.h>
 #include <fcntl.h>      /* For open() */
@@ -336,7 +337,7 @@ int llog, lcode, lchan, lstype;
 
 	if(test_first && (strcmp(filename, "stdout") == 0
 			|| strcmp(filename, "STDOUT") == 0)) {
-		test_first == 0;
+		test_first = 0;
 		xdrstdio_create(&xdr_out, stdout, XDR_ENCODE);
 	}
 	else if((fptr == NULL || *wtype != 'a') && test_first){

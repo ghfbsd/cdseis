@@ -1,6 +1,6 @@
 '\" t
 .\" Above line means this should be processed through tbl by the man command.
-.TH CDSEIS 1L "18 Nov. 2015" "U Bristol" 
+.TH CDSEIS 1L "20 Feb. 2023" "U Bristol" 
 .SH NAME
 cdseis \- scans for and extracts digital seismic data from CDROMs and SEED volumes
 .SH SYNOPSIS
@@ -219,6 +219,13 @@ channel and phase.  If the file name contains a # character, it will be
 replaced with one of the characters z, n, e, r, or t identifying the component.
 T}
 ^(Default: ah.data)
+.sp
+RESP { RESP | PZ }^T{
+Specifies if an instrument response file should be written.
+Choose RESP for an EVALRESP-style file and PZ for a SAC-style pole-zero file.
+Note RESP-style output is only available from SEED volumes.
+T}
+^(Default: RESP)
 .sp
 OTYP output_file_type^T{
 Specifies the type of output file.

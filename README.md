@@ -237,6 +237,8 @@ and modified the code to run in a UNIX environment.  Tom McSweeney wrote the
 routine write_ah.c.  Doug Wiens wrote an early version of the instrument
 response reader.  George Helffrich added SAC output and implemented reading
 of SEED volumes, and is responsible for continued maintenance of CDSEIS.
+Thanks to the IRIS DMC (and its' many software developers) for providing
+rdseed code, from which EVALRESP-compatible response writing was derived.
 
 Please report bugs, suggestions, and comments to G. Helffrich.
 
@@ -302,6 +304,8 @@ CHANGES AND BUG FIXES IN CDSEIS 2.0
 30. Handle new seed data block types (M, Q, etc.)
 31. Make g77 & gfortran compatible.
 32. Put network name and LOCID into SAC output files
+33. Added EVALRESP response output.
+34. Made error messages about invalid input more descriptive.
 
 
 WISHLIST
@@ -313,7 +317,5 @@ WISHLIST
   that takes up less space.)
 - Change SAC output so that freq-amp-phase response information may be written
   out in SAC's FAP file format.
-- Change output from SEED volumes so that EVALRESP response output may be
-  produced for full response information.
 
 Keep wishing for no bugs in the code.
