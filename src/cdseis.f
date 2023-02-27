@@ -25,6 +25,8 @@ c      handle time-dependent, multiple responses in station records
 c  version 004: 21/2/2023
 c      output EVALRESP responses
 c      improve error message on bad command inputs
+c  version 4.0.1: 21/2/2023
+c      different versioning scheme
 
 c  Please report bugs, problems or comments to:
 c      Ken Creager
@@ -101,7 +103,7 @@ c     data outtyp/'ah  '/, wtype/'a '/
       filecode(1)='ah.data'
 c
 c     call ieeeset('environment')
-      print *,'CDSEIS 2.0 (grh-004)'
+      print *,'CDSEIS 2.0 (4.0.1)'
 10    print *,'Enter commands'
       call ASK(code,line,nfound,xdata,nerr)
       if (nerr.eq.0) go to 11

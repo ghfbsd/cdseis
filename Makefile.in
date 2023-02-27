@@ -40,6 +40,12 @@ make_tt:
 	   make_tt \
 	)
 
+resptest:
+	(cd src; \
+	$(MAKE) FC=$(FC) CC=$(CC) FFLAGS="$(FFLAGS)" CFLAGS="$(CFLAGS)" \
+	   resptest \
+	)
+
 cdseis.in.scan: cdseis.in.scan.in Makefile
 	sed -e "s^[@]LIBDIR[@]^$(LIBDIR)^g" < cdseis.in.scan.in > cdseis.in.scan
 	@echo 'After "make install", CDSEIS travel time files (PDIR) will be'
@@ -63,7 +69,7 @@ uninstall:
 	/bin/rm -rf $(LIBDIR)
 	$(MAKE) distclean
 
-test:	main
+test:	main resptest
 	(cd test; \
 	   echo CDLV-RF.seed | \
 	      ../src/makelog -cat std seed events.dat > CDLV-RF.log \
@@ -76,6 +82,9 @@ test:	main
 	     test -f /tmp/cdlv.990615a.p.$$s.resp || \
                 echo '**Response file failure ($$s)' ; \
         done
+	-@/bin/rm -f /tmp/CDLV.resp
+	src/resptest test/seed/CDLV-RF.seed CDLV YF
+	-@test -f /tmp/CDLV.resp || echo '**RESP extraction failure (BHZ)'
 
 clean:
 	(cd src; $(MAKE) clean)

@@ -213,6 +213,8 @@ int dumpresp(char *file, char *net, char *sta, char *chan, char *loc,
    void *p;
 
    char *ofn = strndup(file, (unsigned long)len_file);
+   for(i=strlen(ofn)-1; (i>=0) && (ofn[i] == ' '); i--)
+      ofn[i] = '\0';                             /* zero trailing blanks */
 
    for(i=0;i<sizeof(sta5);i++)                   /* blank pad station */
       sta5[i] = i<len_sta ? sta[i] : ' ';
