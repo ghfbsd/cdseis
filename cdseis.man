@@ -1,6 +1,6 @@
 '\" t
 .\" Above line means this should be processed through tbl by the man command.
-.TH CDSEIS 1L "20 Feb. 2023" "U Bristol" 
+.TH CDSEIS 1L "20 Mar. 2023" "U Bristol" 
 .SH NAME
 cdseis \- scans for and extracts digital seismic data from CDROMs and SEED volumes
 .SH SYNOPSIS
@@ -392,13 +392,18 @@ filenames.
 .PP
 Along with each SAC waveform output file, an instrument response file is also 
 written.  This file's name is the same as the waveform output file but
-suffixed with '.pz'.  It contains the normalization constant and the poles and 
+suffixed with '.resp' (for RESP-style output) or '.pz' (for PZ-style output).
+The RESP file contains all the information necessary to remove the instrument
+response with SAC's transfer command (e.g. 'transfer from evalresp fname
+xxx.resp to none').
+The PZ file contains the normalization constant and the poles and 
 zeroes representation of the response and may be used as input to the SAC
-transfer command (e.g. 'transfer from polezero subtype ...pz ...').
-The file also contains the equivalent of the AH record and event comments,
-as well as the processing log (which records time corrections, rotations,
-etc.).  The digital sensitivity (or gain) of each component is present as 
-the SCALE variable in the SAC file header.
+transfer command (e.g. 'transfer from polezero subtype ...pz ...'); the digital
+sensitivity (or gain) of each component is present as the SCALE variable in
+the SAC file header.
+For either type of response output, the file also contains the equivalent of
+the AH record and event comments, as well as the processing log (which records
+time corrections, rotations, etc.).
 .LP
 Commands with angle limits are designed so that the angles 
 should "wrap" correctly.  For example,  QAZI  350  10   should select 

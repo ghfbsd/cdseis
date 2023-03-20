@@ -172,7 +172,7 @@ seed.iosubs.o: seed.io.com
 seed.possubs.o: seed.io.com
 
 clean:
-	/bin/rm -f *.o */*.o core output fort.9
+	/bin/rm -f *.o */*.o core output fort.9 *.dSYM
 
 distclean: clean
-	/bin/rm -f cdseis makelog make_tt .gdb_history
+	/bin/rm -f cdseis makelog make_tt resptest .gdb_history

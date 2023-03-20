@@ -301,7 +301,7 @@ c        Comment command -- does nothing.
          print 22,qcolat1,qcolat2
 22       format ('QLOC: Minimum, maximum quake colatitude:     ',2f8.2)
          print 23,qcolon1,qcolon2
-23       format ('    : Minimum, maximum quake colongitude:    ',2f8.2)
+23       format ('    : Minimum, maximum quake longitude:      ',2f8.2)
          print 24,qdep1,qdep2
 24       format ('QDEP: Minimum, maximum quake depth (km):     ',2f8.2)
          print 25,qmag1,qmag2
@@ -309,11 +309,11 @@ c        Comment command -- does nothing.
          print 26,scolat1,scolat2
 26       format ('SLOC: Minimum, maximum station colatitude:   ',2f8.2)
          print 27,scolon1,scolon2
-27       format ('    : Minimum ,maximum station colongitude:  ',2f8.2)
+27       format ('    : Minimum, maximum station longitude:    ',2f8.2)
          print 29,del1,del2
 29       format ('RANG: Minimum, maximum quake-station range:  ',2f8.2)
          print 38,pcolat,pcolon,pdello,pdelhi
-38       format ('PRNG: Ref. point colatitude, colongitude:    ',2f8.2,
+38       format ('PRNG: Ref. point colatitude, longitude:      ',2f8.2,
      +         /,'    : Minimum, maximum range from ref. point:',2f8.2)
          print 30,qazi1,qazi2
 30       format ('QAZI: Minimum, maximum quake azimuth:        ',2f8.2)
@@ -322,7 +322,7 @@ c        Comment command -- does nothing.
          print 40,mcolat1,mcolat2
 40       format ('MLOC: Minimum, maximum midpoint colatitude:  ',2f8.2)
          print 41,mcolon1,mcolon2
-41       format ('    : Minimum ,maximum midpoint colongitude: ',2f8.2)
+41       format ('    : Minimum, maximum midpoint longitude:   ',2f8.2)
          print 32,time1,time2
 32       format ('WIND: Min, max minutes in data window:       ',2f8.2)
          print 33,srat1,srat2
